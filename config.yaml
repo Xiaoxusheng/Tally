@@ -1,0 +1,23 @@
+service:
+  port: 80
+  name: "1239"
+
+
+mysql:
+  username: "root"
+  password: "admin123"
+  database: "talk"
+
+redis:
+  addr: "47.113.189.23:6379"
+  db: 0
+  password: "admin123"
+  poolsize: 1000
+  maxidleconns: 1000
+  minidleconns: 10
+  connMaxIdleTime: 10000000000
+
+
+jwt:
+  time: 12
+  key: "hello,everyone"
