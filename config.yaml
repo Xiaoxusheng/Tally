@@ -15,7 +15,7 @@ redis:
   poolsize: 1000
   maxidleconns: 1000
   minidleconns: 10
-  connMaxIdleTime: 10000000000
+  connMaxIdleTime: 10
 
 
 jwt:

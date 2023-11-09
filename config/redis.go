@@ -5,6 +5,7 @@ import (
 	"context"
 	"github.com/redis/go-redis/v9"
 	"log"
+	"time"
 )
 
 func InitRedis() {
@@ -15,15 +16,17 @@ func InitRedis() {
 		PoolSize:        Config.Redis.PoolSize,
 		MinIdleConns:    Config.Redis.MinIdleConns,
 		MaxIdleConns:    Config.Redis.MaxIdleConns,
-		ConnMaxIdleTime: Config.Redis.ConnMaxIdleTime,
+		ConnMaxIdleTime: Config.Redis.ConnMaxIdleTime * time.Second,
 	})
-	res, err := rdb.Ping(context.Background()).Result()
+	ctx := context.Background()
+	res, err := rdb.Ping(ctx).Result()
 	if err != nil {
 		log.Println(err)
 		return
 	}
 	if res == "PONG" {
-		log.Println("连接redis 成功!")
+		log.Println("redis连接成功!")
 	}
 	global.Global.Redis = rdb
+	global.Global.Ctx = ctx
 }

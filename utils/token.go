@@ -14,20 +14,18 @@ type MyCustomClaims struct {
 	jwt.RegisteredClaims
 }
 
-func GetToken(identity string) {
+func GetToken(identity string) string {
 	// Create claims with multiple fields populated
 	claims := MyCustomClaims{
-		"bar",
+		identity,
 		jwt.RegisteredClaims{
 			// A usual scenario is to set the expiration time relative to the current time
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(config.Config.Jwt.Time * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}
-
-	fmt.Printf("foo: %v\n", claims.Identity)
-
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	ss, err := token.SignedString(mySigningKey)
 	fmt.Println(ss, err)
+	return ss
 }
