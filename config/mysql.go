@@ -21,6 +21,7 @@ func InitMysql() {
 	log.Println("mysql初始化成功")
 	global.Global.Mysql = db
 	err = global.Global.Mysql.AutoMigrate(&models.User{})
+	err = global.Global.Mysql.AutoMigrate(&models.Tally{})
 	if err != nil {
 		panic(err)
 	}

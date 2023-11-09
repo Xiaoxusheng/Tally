@@ -20,7 +20,7 @@ func Register(c echo.Context) error {
 	user := new(RegisterUser)
 	err := c.Bind(user)
 	if err != nil {
-		return common.Fail(c, http.StatusOK, "解析失败！")
+		return common.Fail(c, global.UserCode, "解析失败！")
 	}
 	err = c.Validate(user)
 	if err != nil {
@@ -28,7 +28,7 @@ func Register(c echo.Context) error {
 	}
 	//注册
 	if ok := dao.GetPhone(user.Phone); ok {
-		return common.Fail(c, http.StatusOK, "电话号码已经存在！")
+		return common.Fail(c, global.UserCode, "电话号码已经存在！")
 	}
 	//
 	if ok := dao.GetUserByUsername(user.Username); ok {
@@ -43,7 +43,7 @@ func Register(c echo.Context) error {
 		Identity: id,
 	})
 	if err != nil {
-		return common.Fail(c, http.StatusOK, "注册失败！")
+		return common.Fail(c, global.UserCode, "注册失败！")
 	}
 	go func() {
 		global.Global.Redis.HSet(global.Global.Ctx, user.Username, user.Password, id)

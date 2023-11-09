@@ -2,12 +2,12 @@ package user
 
 import (
 	"Tally/common"
+	"Tally/config"
 	"Tally/dao"
 	"Tally/global"
 	"Tally/utils"
 	"fmt"
 	"github.com/labstack/echo/v4"
-	"net/http"
 )
 
 type User struct {
@@ -19,7 +19,7 @@ func Login(c echo.Context) error {
 	user := new(User)
 	err := c.Bind(user)
 	if err != nil {
-		return common.Fail(c, http.StatusOK, "解析错误！")
+		return common.Fail(c, global.UserCode, "解析错误！")
 	}
 	err = c.Validate(user)
 	if err != nil {
@@ -28,10 +28,11 @@ func Login(c echo.Context) error {
 	fmt.Println(user)
 	//从redis获取
 	val := global.Global.Redis.HGet(global.Global.Ctx, user.Username, user.Password).Val()
+	token := utils.GetToken(val)
 	if val != "" {
 		fmt.Println(val)
 		return common.Ok(c, map[string]any{
-			"token": utils.GetToken(val),
+			"token": token,
 		})
 	} else {
 		//数据库中获取
@@ -43,10 +44,10 @@ func Login(c echo.Context) error {
 		go func() {
 			global.Global.Redis.HSet(global.Global.Ctx, user.Username, user.Password, ok.Identity)
 			//	放入token
-
+			global.Global.Redis.Set(global.Global.Ctx, ok.Identity, token, config.Config.Jwt.Time)
 		}()
 		return common.Ok(c, map[string]any{
-			"token": utils.GetToken(ok.Identity),
+			"token": token,
 		})
 	}
 }
