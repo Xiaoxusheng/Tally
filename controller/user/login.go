@@ -28,7 +28,7 @@ func Login(c echo.Context) error {
 	}
 	fmt.Println(user)
 	//从redis获取
-	val := global.Global.Redis.HGet(global.Global.Ctx, user.Username, user.Password).Val()
+	val := global.Global.Redis.HGet(global.Global.Ctx, user.Username, utils.Md5(user.Password)).Val()
 	token := utils.GetToken(val)
 	if val != "" {
 		fmt.Println(val)
@@ -44,6 +44,7 @@ func Login(c echo.Context) error {
 		if ok == nil {
 			return common.Fail(c, global.UserCode, "用户名或密码错误")
 		}
+		token := utils.GetToken(ok.Identity)
 		//异步更新
 		go func() {
 			global.Global.Redis.HSet(global.Global.Ctx, user.Username, user.Password, ok.Identity)
