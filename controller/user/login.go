@@ -8,6 +8,7 @@ import (
 	"Tally/utils"
 	"fmt"
 	"github.com/labstack/echo/v4"
+	"time"
 )
 
 type User struct {
@@ -31,6 +32,9 @@ func Login(c echo.Context) error {
 	token := utils.GetToken(val)
 	if val != "" {
 		fmt.Println(val)
+		go func() {
+			global.Global.Redis.Set(global.Global.Ctx, val, token, config.Config.Jwt.Time*time.Hour)
+		}()
 		return common.Ok(c, map[string]any{
 			"token": token,
 		})
@@ -44,7 +48,7 @@ func Login(c echo.Context) error {
 		go func() {
 			global.Global.Redis.HSet(global.Global.Ctx, user.Username, user.Password, ok.Identity)
 			//	放入token
-			global.Global.Redis.Set(global.Global.Ctx, ok.Identity, token, config.Config.Jwt.Time)
+			global.Global.Redis.Set(global.Global.Ctx, ok.Identity, token, config.Config.Jwt.Time*time.Hour)
 		}()
 		return common.Ok(c, map[string]any{
 			"token": token,

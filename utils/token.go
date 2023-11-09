@@ -7,14 +7,13 @@ import (
 	"time"
 )
 
-var mySigningKey = []byte(config.Config.Jwt.Key)
-
 type MyCustomClaims struct {
 	Identity string `json:"identity"`
 	jwt.RegisteredClaims
 }
 
 func GetToken(identity string) string {
+	var mySigningKey = []byte(config.Config.Jwt.Key)
 	// Create claims with multiple fields populated
 	claims := MyCustomClaims{
 		identity,

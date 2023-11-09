@@ -13,10 +13,11 @@ func Routers(e *echo.Echo) {
 	e.Validator = &utils.CustomValidator{Validator: validator.New()}
 	e.Use(middleware.Logger(), middleware.CORS(), middleware.Timeout(), middleware.Recover())
 
+	e.POST("/user/login", user.Login)
+	e.POST("/user/register", user.Register)
 	users := e.Group("/user")
 	users.Use(m.ParseToken())
-	e.POST("/login", user.Login)
-	e.POST("/register", user.Register)
 	users.GET("/list", user.TallyList)
 	users.POST("/add", user.AddTallyLog)
+	users.GET("/allot_kind", user.AllotKind)
 }

@@ -2,7 +2,6 @@ service:
   port: 80
   name: "1239"
 
-
 mysql:
   username: "root"
   password: "admin123"
@@ -20,4 +19,5 @@ redis:
 
 jwt:
   time: 12
-  key: "hello,everyone"
+  key:  "welcome to use Cloud-kAuth:Mr.Lei"
+

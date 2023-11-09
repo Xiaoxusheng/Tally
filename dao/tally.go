@@ -21,3 +21,12 @@ func InsertTally(u *models.Tally) error {
 	}
 	return nil
 }
+
+func GetTallyKind(identity string, n string) *models.Tally {
+	list := new(models.Tally)
+	err := global.Global.Mysql.Where("king=? and identity=?", n, identity).Find(list).Error
+	if err != nil {
+		return nil
+	}
+	return list
+}
