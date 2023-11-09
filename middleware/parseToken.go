@@ -26,13 +26,13 @@ func ParseToken() echo.MiddlewareFunc {
 				return common.Fail(c, global.VerifyCode, "token 不能为空")
 			}
 			t := strings.Split(tokenString, " ")
-			fmt.Println("t", t[len(t)-1], t)
 
 			claims := new(utils.MyCustomClaims)
 			token, err := jwt.ParseWithClaims(t[len(t)-1], claims, func(token *jwt.Token) (interface{}, error) {
 				return []byte(config.Config.Jwt.Key), nil
 			})
 			_, err = global.Global.Redis.Get(global.Global.Ctx, claims.Identity).Result()
+			fmt.Println("122", claims.Identity, err)
 			if err != nil {
 				fmt.Println(err)
 				return common.Fail(c, global.VerifyCode, "token 过期")

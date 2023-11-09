@@ -13,5 +13,5 @@ type Tally struct {
 }
 
 func (Tally) TableName() string {
-	return "tally"
+	return "tally_basic"
 }

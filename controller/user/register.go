@@ -6,6 +6,7 @@ import (
 	"Tally/global"
 	"Tally/models"
 	"Tally/utils"
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -43,6 +44,7 @@ func Register(c echo.Context) error {
 		Identity: id,
 	})
 	if err != nil {
+		fmt.Println(err)
 		return common.Fail(c, global.UserCode, "注册失败！")
 	}
 	go func() {

@@ -20,4 +20,6 @@ func Routers(e *echo.Echo) {
 	users.GET("/list", user.TallyList)
 	users.POST("/add", user.AddTallyLog)
 	users.GET("/allot_kind", user.AllotKind)
+	users.GET("/bind", user.BindKind)
+	users.GET("/date_list", user.DateList)
 }
