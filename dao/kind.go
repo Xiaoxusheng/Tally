@@ -21,5 +21,4 @@ func GetByKind(s int) bool {
 		return false
 	}
 	return true
-
 }

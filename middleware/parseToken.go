@@ -32,10 +32,10 @@ func ParseToken() echo.MiddlewareFunc {
 				return []byte(config.Config.Jwt.Key), nil
 			})
 			_, err = global.Global.Redis.Get(global.Global.Ctx, claims.Identity).Result()
-			fmt.Println("122", claims.Identity, err)
+
 			if err != nil {
 				fmt.Println(err)
-				return common.Fail(c, global.VerifyCode, "token 过期")
+				return common.Fail(c, global.VerifyCode, "token过期或退出登录")
 			}
 			c.Set("identity", claims.Identity)
 

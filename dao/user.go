@@ -16,6 +16,16 @@ func GetUserById(username, password string) *models.User {
 	return user
 }
 
+func GetUserByIdentity(id string) *models.User {
+	//
+	user := new(models.User)
+	err := global.Global.Mysql.Where("identity=? ", id).Take(user).Error
+	if err != nil {
+		return nil
+	}
+	return user
+}
+
 func GetPhone(phone string) bool {
 	user := new(models.User)
 	err := global.Global.Mysql.Where("phone=?", phone).Take(user).Error

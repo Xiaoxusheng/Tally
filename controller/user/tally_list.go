@@ -31,7 +31,8 @@ func TallyList(c echo.Context) error {
 		return common.Fail(c, global.TallyCode, "获取失败")
 	}
 	//缓存中获取
-	val := global.Global.Redis.HGet(global.Global.Ctx, id, "list").Val()
+	val := global.Global.Redis.Get(global.Global.Ctx, id+"list").Val()
+	fmt.Println(val)
 	if val != "" {
 		return common.Ok(c, val)
 	} else {
@@ -40,7 +41,8 @@ func TallyList(c echo.Context) error {
 			return common.Fail(c, global.TallyCode, "获取失败")
 		}
 		go func() {
-			global.Global.Redis.HSet(global.Global.Ctx, id, "list", list, time.Duration(utils.GetRandom()))
+			val, err := global.Global.Redis.Set(global.Global.Ctx, id+"list", list, 0).Result()
+			fmt.Println(val, err)
 		}()
 		return common.Ok(c, list)
 	}
@@ -79,16 +81,14 @@ func AllotKind(c echo.Context) error {
 	if userIdentity == "" {
 		return common.Fail(c, global.TallyCode, "获取失败")
 	}
-	val := global.Global.Redis.HGet(global.Global.Ctx, userIdentity, kind).Val()
+	val := global.Global.Redis.Get(global.Global.Ctx, userIdentity+kind).Val()
 	if val != "" {
 		return common.Ok(c, val)
 	} else {
 		list := dao.GetTallyKind(userIdentity, kind)
 		go func() {
 			//存入redis
-			global.Global.Redis.HSet(global.Global.Ctx, userIdentity, kind, list)
-			//设置时间
-			global.Global.Redis.Expire(global.Global.Ctx, userIdentity, time.Duration(utils.GetRandom()))
+			global.Global.Redis.Set(global.Global.Ctx, userIdentity+kind, list, 0)
 		}()
 		return common.Ok(c, list)
 	}
@@ -113,16 +113,20 @@ func DateList(c echo.Context) error {
 	end := time.Unix(t.EndTime, 0)
 	fmt.Println(star, end)
 	//redis
-	val := global.Global.Redis.HGet(global.Global.Ctx, userIdentity, star.String()+end.String()).Val()
+	val := global.Global.Redis.Get(global.Global.Ctx, userIdentity+star.String()+end.String()).Val()
 	if val != "" {
 		return common.Ok(c, val)
 	} else {
 		list := dao.GetByTime(star.String(), end.String())
 		if list == nil {
+			//没查到，防止穿透
+			go func() {
+				global.Global.Redis.Set(global.Global.Ctx, userIdentity+star.String()+end.String(), "null", 0)
+			}()
 			return common.Fail(c, global.TallyCode, "查询失败")
 		}
 		go func() {
-			global.Global.Redis.HSet(global.Global.Ctx, userIdentity, star.String()+end.String(), list)
+			global.Global.Redis.Set(global.Global.Ctx, userIdentity+star.String()+end.String(), list, 0)
 		}()
 		return common.Ok(c, list)
 	}

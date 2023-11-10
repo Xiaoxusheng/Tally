@@ -1,6 +1,9 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"encoding/json"
+	"gorm.io/gorm"
+)
 
 type Tally struct {
 	gorm.Model
@@ -12,6 +15,11 @@ type Tally struct {
 	Category     int     `gorm:"type:int not null; comment:'类别'"`
 }
 
-func (Tally) TableName() string {
+func (t *Tally) TableName() string {
 	return "tally_basic"
+}
+
+func (t *Tally) MarshalBinary() ([]byte, error) {
+	// 在这里编写将 User 类型转换为字节切片的逻辑
+	return json.Marshal(t)
 }

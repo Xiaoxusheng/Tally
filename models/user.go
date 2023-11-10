@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/json"
 	"gorm.io/gorm"
 )
 
@@ -13,6 +14,11 @@ type User struct {
 	IP       string `gorm:"type:varchar(64) not null"`
 }
 
-func (User) TableName() string {
+func (u *User) TableName() string {
 	return "user_basic"
+}
+
+func (u *User) MarshalBinary() ([]byte, error) {
+	// 在这里编写将 User 类型转换为字节切片的逻辑
+	return json.Marshal(u)
 }

@@ -18,6 +18,8 @@ func Routers(e *echo.Echo) {
 	users := e.Group("/user")
 	users.Use(m.ParseToken())
 	users.GET("/list", user.TallyList)
+	users.GET("/info", user.Info)
+	users.GET("/logout", user.Logout)
 	users.POST("/add", user.AddTallyLog)
 	users.GET("/allot_kind", user.AllotKind)
 	users.GET("/bind", user.BindKind)
