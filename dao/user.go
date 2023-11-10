@@ -16,6 +16,23 @@ func GetUserById(username, password string) *models.User {
 	return user
 }
 
+func GetByPwdIdentity(id, pwd string) bool {
+	user := new(models.User)
+	err := global.Global.Mysql.Where("identity and password=? ", id, pwd).Take(user).Error
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+func UpdatePwd(id, pwd string) error {
+	err := global.Global.Mysql.Where("identity=?", id).Update("password", pwd).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func GetUserByIdentity(id string) *models.User {
 	//
 	user := new(models.User)

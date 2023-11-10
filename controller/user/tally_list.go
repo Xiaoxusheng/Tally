@@ -6,6 +6,7 @@ import (
 	"Tally/global"
 	"Tally/models"
 	"Tally/utils"
+	"encoding/json"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"strconv"
@@ -13,10 +14,10 @@ import (
 )
 
 type List struct {
-	Kind     int     `json:"kind"`
-	Money    float64 `json:"money"`
-	Remark   string  `json:"remark"`
-	Category int     `json:"category"`
+	Kind     int     `json:"kind" query:"kind" form:"kind"`
+	Money    float64 `json:"money" query:"money" form:"money"`
+	Remark   string  `json:"remark" query:"remark" form:"remark"`
+	Category int     `json:"category" query:"category" form:"category"`
 }
 
 type Time struct {
@@ -32,16 +33,25 @@ func TallyList(c echo.Context) error {
 	}
 	//缓存中获取
 	val := global.Global.Redis.Get(global.Global.Ctx, id+"list").Val()
-	fmt.Println(val)
+	fmt.Println("val", val)
 	if val != "" {
-		return common.Ok(c, val)
+		var tally []models.Tally
+		err := json.Unmarshal([]byte(val), &tally)
+		if err != nil {
+			return err
+		}
+		return common.Ok(c, tally)
 	} else {
 		list := dao.GetTallyList(id)
 		if list == nil {
 			return common.Fail(c, global.TallyCode, "获取失败")
 		}
 		go func() {
-			val, err := global.Global.Redis.Set(global.Global.Ctx, id+"list", list, 0).Result()
+			marshal, err := json.Marshal(list)
+			if err != nil {
+				return
+			}
+			val, err := global.Global.Redis.Set(global.Global.Ctx, id+"list", marshal, 0).Result()
 			fmt.Println(val, err)
 		}()
 		return common.Ok(c, list)
@@ -71,6 +81,10 @@ func AddTallyLog(c echo.Context) error {
 	if err != nil {
 		return common.Fail(c, global.TallyCode, "添加失败")
 	}
+	go func() {
+		val, err := global.Global.Redis.Del(global.Global.Ctx, userIdentity+"list").Result()
+		fmt.Println("删除", val, err)
+	}()
 	return common.Ok(c, nil)
 }
 
@@ -83,12 +97,21 @@ func AllotKind(c echo.Context) error {
 	}
 	val := global.Global.Redis.Get(global.Global.Ctx, userIdentity+kind).Val()
 	if val != "" {
-		return common.Ok(c, val)
+		var list []models.Tally
+		err := json.Unmarshal([]byte(val), &list)
+		if err != nil {
+			return err
+		}
+		return common.Ok(c, list)
 	} else {
 		list := dao.GetTallyKind(userIdentity, kind)
 		go func() {
+			marshal, err := json.Marshal(list)
+			if err != nil {
+				return
+			}
 			//存入redis
-			global.Global.Redis.Set(global.Global.Ctx, userIdentity+kind, list, 0)
+			global.Global.Redis.Set(global.Global.Ctx, userIdentity+kind, marshal, 0)
 		}()
 		return common.Ok(c, list)
 	}
@@ -115,7 +138,12 @@ func DateList(c echo.Context) error {
 	//redis
 	val := global.Global.Redis.Get(global.Global.Ctx, userIdentity+star.String()+end.String()).Val()
 	if val != "" {
-		return common.Ok(c, val)
+		var vals []models.Tally
+		err := json.Unmarshal([]byte(val), &vals)
+		if err != nil {
+			return err
+		}
+		return common.Ok(c, vals)
 	} else {
 		list := dao.GetByTime(star.String(), end.String())
 		if list == nil {
@@ -126,7 +154,11 @@ func DateList(c echo.Context) error {
 			return common.Fail(c, global.TallyCode, "查询失败")
 		}
 		go func() {
-			global.Global.Redis.Set(global.Global.Ctx, userIdentity+star.String()+end.String(), list, 0)
+			marshal, err := json.Marshal(list)
+			if err != nil {
+				return
+			}
+			global.Global.Redis.Set(global.Global.Ctx, userIdentity+star.String()+end.String(), marshal, 0)
 		}()
 		return common.Ok(c, list)
 	}

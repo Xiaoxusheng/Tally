@@ -5,7 +5,9 @@ import (
 	"Tally/config"
 	"Tally/dao"
 	"Tally/global"
+	"Tally/models"
 	"Tally/utils"
+	"encoding/json"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"time"
@@ -77,9 +79,13 @@ func Info(c echo.Context) error {
 	}
 	//redis获取
 	val := global.Global.Redis.Get(global.Global.Ctx, identity+"info").Val()
-	fmt.Println("redis获取", val)
 	if val != "" {
-		return common.Ok(c, val)
+		user := new(models.User)
+		err := json.Unmarshal([]byte(val), user)
+		if err != nil {
+			return err
+		}
+		return common.Ok(c, user)
 	} else {
 		info := dao.GetUserByIdentity(identity)
 		if info == nil {
@@ -91,4 +97,23 @@ func Info(c echo.Context) error {
 		}()
 		return common.Ok(c, info)
 	}
+}
+
+func ChangePwd(c echo.Context) error {
+	id := utils.GetIdentity(c, "identity")
+	if id == "" {
+		return common.Fail(c, global.UserCode, "获取失败")
+	}
+	pwd := c.QueryParam("pwd")
+	if pwd == "" {
+		return common.Fail(c, global.UserCode, "密码不能为空")
+	}
+	if ok := dao.GetByPwdIdentity(id, pwd); !ok {
+		return common.Fail(c, global.UserCode, "密码错误")
+	}
+	err := dao.UpdatePwd(id, utils.Md5(pwd))
+	if err != nil {
+		return common.Fail(c, global.UserCode, "密码修改失败")
+	}
+	return common.Ok(c, nil)
 }

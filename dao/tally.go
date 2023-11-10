@@ -3,14 +3,17 @@ package dao
 import (
 	"Tally/global"
 	"Tally/models"
+	"fmt"
 )
 
-func GetTallyList(id string) *models.Tally {
-	list := new(models.Tally)
-	err := global.Global.Mysql.Where("user_identity=?", id).Find(list).Error
+func GetTallyList(id string) []*models.Tally {
+	list := make([]*models.Tally, 0)
+	err := global.Global.Mysql.Where("user_identity=?", id).Find(&list).Error
 	if err != nil {
+		panic(err)
 		return nil
 	}
+	fmt.Println("list", list)
 	return list
 }
 
@@ -24,7 +27,7 @@ func InsertTally(u *models.Tally) error {
 
 func GetTallyKind(identity string, n string) []*models.Tally {
 	list := make([]*models.Tally, 0)
-	err := global.Global.Mysql.Where("king=? and identity=?", n, identity).Find(list).Error
+	err := global.Global.Mysql.Where("king=? and identity=?", n, identity).Find(&list).Error
 	if err != nil {
 		return nil
 	}
@@ -33,7 +36,7 @@ func GetTallyKind(identity string, n string) []*models.Tally {
 
 func GetByTime(star, end string) []*models.Tally {
 	list := make([]*models.Tally, 0)
-	err := global.Global.Mysql.Where("created_at>=? and created_at<=?", star, end).Find(list).Error
+	err := global.Global.Mysql.Where("created_at>=? and created_at<=?", star, end).Find(&list).Error
 	if err != nil {
 		return nil
 	}
