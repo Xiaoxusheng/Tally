@@ -52,3 +52,23 @@ func UpdateByKind(id string, kind int) error {
 	}
 	return nil
 }
+
+func GetLikeList(s string) []*models.Tally {
+	list := make([]*models.Tally, 0)
+	err := global.Global.Mysql.Where("remark like ?", "%"+s+"%").Find(&list).Error
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+	return list
+}
+
+func GetListById(id string) []*models.Tally {
+	list := make([]*models.Tally, 0)
+	err := global.Global.Mysql.Where("identity like ?", "%"+id+"%").Find(&list).Error
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+	return list
+}

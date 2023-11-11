@@ -7,4 +7,5 @@ const (
 	TallyCode  = 100012
 	VerifyCode = 400000
 	KindCode   = 100013
+	SearchCode = 100014
 )
