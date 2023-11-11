@@ -31,32 +31,36 @@ func Login(c echo.Context) error {
 	fmt.Println(user)
 	//从redis获取
 	val := global.Global.Redis.HGet(global.Global.Ctx, user.Username, utils.Md5(user.Password)).Val()
-	token := utils.GetToken(val)
-	if val != "" {
-		fmt.Println("identity得值", val)
-		go func() {
-			global.Global.Redis.Set(global.Global.Ctx, val, token, config.Config.Jwt.Time*time.Hour)
-		}()
-		return common.Ok(c, map[string]any{
-			"token": token,
-		})
+	res := global.Global.Redis.Get(global.Global.Ctx, val).Val()
+	if res != "" {
+		return common.Ok(c, map[string]any{"token": res})
 	} else {
-		//数据库中获取
-		ok := dao.GetUserById(user.Username, utils.Md5(user.Password))
-		if ok == nil {
-			return common.Fail(c, global.UserCode, "用户名或密码错误")
+		token := utils.GetToken(val)
+		if val != "" {
+			fmt.Println("identity得值", val)
+			go func() {
+				global.Global.Redis.Set(global.Global.Ctx, val, token, config.Config.Jwt.Time*time.Hour)
+			}()
+			return common.Ok(c, map[string]any{"token": token})
+		} else {
+			//数据库中获取
+			ok := dao.GetUserById(user.Username, utils.Md5(user.Password))
+			if ok == nil {
+				return common.Fail(c, global.UserCode, "用户名或密码错误")
+			}
+			token := utils.GetToken(ok.Identity)
+			//异步更新
+			go func() {
+				global.Global.Redis.HSet(global.Global.Ctx, user.Username, utils.Md5(user.Password), ok.Identity)
+				//	放入token
+				global.Global.Redis.Set(global.Global.Ctx, ok.Identity, token, config.Config.Jwt.Time*time.Hour)
+			}()
+			return common.Ok(c, map[string]any{
+				"token": token,
+			})
 		}
-		token := utils.GetToken(ok.Identity)
-		//异步更新
-		go func() {
-			global.Global.Redis.HSet(global.Global.Ctx, user.Username, user.Password, ok.Identity)
-			//	放入token
-			global.Global.Redis.Set(global.Global.Ctx, ok.Identity, token, config.Config.Jwt.Time*time.Hour)
-		}()
-		return common.Ok(c, map[string]any{
-			"token": token,
-		})
 	}
+
 }
 
 func Logout(c echo.Context) error {

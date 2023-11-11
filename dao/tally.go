@@ -25,10 +25,11 @@ func InsertTally(u *models.Tally) error {
 	return nil
 }
 
-func GetTallyKind(identity string, n string) []*models.Tally {
+func GetTallyKind(identity string, n int) []*models.Tally {
 	list := make([]*models.Tally, 0)
-	err := global.Global.Mysql.Where("king=? and identity=?", n, identity).Find(&list).Error
+	err := global.Global.Mysql.Where("category=? and user_identity=?", n, identity).Find(&list).Error
 	if err != nil {
+		fmt.Println(err)
 		return nil
 	}
 	return list

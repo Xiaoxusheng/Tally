@@ -90,12 +90,14 @@ func AddTallyLog(c echo.Context) error {
 
 // AllotKind 根据分类获取列表数据
 func AllotKind(c echo.Context) error {
-	kind := c.QueryParam("kind")
+	category := c.QueryParam("category")
 	userIdentity := utils.GetIdentity(c, "identity")
 	if userIdentity == "" {
 		return common.Fail(c, global.TallyCode, "获取失败")
 	}
-	val := global.Global.Redis.Get(global.Global.Ctx, userIdentity+kind).Val()
+	//解决数据不一致问题
+	val := global.Global.Redis.Get(global.Global.Ctx, userIdentity+category).Val()
+	fmt.Println("val", val)
 	if val != "" {
 		var list []models.Tally
 		err := json.Unmarshal([]byte(val), &list)
@@ -104,14 +106,18 @@ func AllotKind(c echo.Context) error {
 		}
 		return common.Ok(c, list)
 	} else {
-		list := dao.GetTallyKind(userIdentity, kind)
+		n, err := strconv.Atoi(category)
+		if err != nil {
+			return err
+		}
+		list := dao.GetTallyKind(userIdentity, n)
 		go func() {
 			marshal, err := json.Marshal(list)
 			if err != nil {
 				return
 			}
 			//存入redis
-			global.Global.Redis.Set(global.Global.Ctx, userIdentity+kind, marshal, 0)
+			global.Global.Redis.Set(global.Global.Ctx, userIdentity+category, marshal, 0)
 		}()
 		return common.Ok(c, list)
 	}

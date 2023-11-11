@@ -2,12 +2,10 @@ package config
 
 import (
 	"Tally/global"
-	"Tally/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"log"
-	"sync"
 )
 
 func InitMysql() {
@@ -21,14 +19,14 @@ func InitMysql() {
 	db.Debug()
 	log.Println("mysql初始化成功")
 	global.Global.Mysql = db
-	f := sync.Once{}
-	f.Do(
-		func() {
-			err = global.Global.Mysql.AutoMigrate(&models.User{})
-			err = global.Global.Mysql.AutoMigrate(&models.Tally{})
-			err = global.Global.Mysql.AutoMigrate(&models.Kind{})
-		})
-	if err != nil {
-		panic(err)
-	}
+	//f := sync.Once{}
+	//f.Do(
+	//	func() {
+	//		err = global.Global.Mysql.AutoMigrate(&models.User{})
+	//		err = global.Global.Mysql.AutoMigrate(&models.Tally{})
+	//		err = global.Global.Mysql.AutoMigrate(&models.Kind{})
+	//	})
+	//if err != nil {
+	//	panic(err)
+	//}
 }
