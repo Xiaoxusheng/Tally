@@ -6,7 +6,7 @@ import (
 )
 
 type Kind struct {
-	gorm.Model   `json:"gorm.Model"`
+	gorm.Model
 	Name         string `gorm:"type:varchar(255);not null;unique;common:分类名称" json:"name,omitempty"`
 	SerialNumber int    `gorm:"type:int;not null;unique;common:类别编号" json:"serialNumber,omitempty"`
 }

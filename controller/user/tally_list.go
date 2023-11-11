@@ -83,6 +83,7 @@ func AddTallyLog(c echo.Context) error {
 	}
 	go func() {
 		val, err := global.Global.Redis.Del(global.Global.Ctx, userIdentity+"list").Result()
+		global.Global.Redis.Del(global.Global.Ctx, userIdentity+strconv.Itoa(t.Category))
 		fmt.Println("删除", val, err)
 	}()
 	return common.Ok(c, nil)
@@ -97,7 +98,7 @@ func AllotKind(c echo.Context) error {
 	}
 	//解决数据不一致问题
 	val := global.Global.Redis.Get(global.Global.Ctx, userIdentity+category).Val()
-	fmt.Println("val", val)
+	//fmt.Println("val", val)
 	if val != "" {
 		var list []models.Tally
 		err := json.Unmarshal([]byte(val), &list)
@@ -172,8 +173,9 @@ func DateList(c echo.Context) error {
 
 // BindKind 绑定分类
 func BindKind(c echo.Context) error {
-	kind, err := strconv.Atoi(c.QueryParam("kind "))
+	category, err := strconv.Atoi(c.QueryParam("category"))
 	if err != nil {
+		fmt.Println(err)
 		return common.Fail(c, global.TallyCode, "转换失败")
 	}
 	id := c.QueryParam("identity ")
@@ -181,10 +183,10 @@ func BindKind(c echo.Context) error {
 	if useIdentity == "" {
 		return common.Fail(c, global.TallyCode, "获取失败")
 	}
-	if ok := dao.GetByKind(kind); !ok {
+	if ok := dao.GetByKind(category); !ok {
 		return common.Fail(c, global.TallyCode, "分类不存在")
 	}
-	err = dao.UpdateByKind(id, kind)
+	err = dao.UpdateByKind(id, category)
 	if err != nil {
 		return common.Fail(c, global.TallyCode, "绑定失败")
 	}

@@ -25,4 +25,7 @@ func Routers(e *echo.Echo) {
 	users.GET("/allot_kind", user.AllotKind)
 	users.GET("/bind", user.BindKind)
 	users.GET("/date_list", user.DateList)
+	users.Any("/addKind", user.AddKind)
+	users.GET("/kind_list", user.KindList)
+
 }

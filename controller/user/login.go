@@ -31,6 +31,8 @@ func Login(c echo.Context) error {
 	fmt.Println(user)
 	//从redis获取
 	val := global.Global.Redis.HGet(global.Global.Ctx, user.Username, utils.Md5(user.Password)).Val()
+	fmt.Println("val", val)
+	//获取token
 	res := global.Global.Redis.Get(global.Global.Ctx, val).Val()
 	if res != "" {
 		return common.Ok(c, map[string]any{"token": res})
@@ -108,16 +110,22 @@ func ChangePwd(c echo.Context) error {
 	if id == "" {
 		return common.Fail(c, global.UserCode, "获取失败")
 	}
+	OldPwd := c.QueryParam("oldpwd")
 	pwd := c.QueryParam("pwd")
 	if pwd == "" {
 		return common.Fail(c, global.UserCode, "密码不能为空")
 	}
-	if ok := dao.GetByPwdIdentity(id, pwd); !ok {
+	ok := dao.GetByPwdIdentity(id, utils.Md5(OldPwd))
+	if ok == nil {
 		return common.Fail(c, global.UserCode, "密码错误")
 	}
 	err := dao.UpdatePwd(id, utils.Md5(pwd))
 	if err != nil {
 		return common.Fail(c, global.UserCode, "密码修改失败")
 	}
+	go func() {
+		global.Global.Redis.Del(global.Global.Ctx, ok.Username)
+	}()
+	//删除缓存
 	return common.Ok(c, nil)
 }

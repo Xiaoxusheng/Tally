@@ -5,9 +5,9 @@ import (
 	"Tally/models"
 )
 
-func GetKind() []*models.Kind {
+func GetKindList() []*models.Kind {
 	kind := make([]*models.Kind, 0)
-	err := global.Global.Mysql.Find(kind).Error
+	err := global.Global.Mysql.Find(&kind).Error
 	if err != nil {
 		return nil
 	}
@@ -21,4 +21,12 @@ func GetByKind(s int) bool {
 		return false
 	}
 	return true
+}
+
+func InsertKind(u *models.Kind) error {
+	err := global.Global.Mysql.Create(u).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }
