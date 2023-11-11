@@ -123,6 +123,7 @@ func ChangePwd(c echo.Context) error {
 	if err != nil {
 		return common.Fail(c, global.UserCode, "密码修改失败")
 	}
+	//删除redis中存放的信息
 	go func() {
 		global.Global.Redis.Del(global.Global.Ctx, ok.Username)
 	}()
