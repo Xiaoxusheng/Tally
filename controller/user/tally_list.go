@@ -21,8 +21,8 @@ type List struct {
 }
 
 type Time struct {
-	StarTime int64 `query:"star_time"`
-	EndTime  int64 `query:"end_time"`
+	StarTime int64 `query:"star_time" json:"star_time" query:"star_time"  form:"star_time"`
+	EndTime  int64 `query:"end_time" json:"end_time" query:"end_time" form:"end_time"`
 }
 
 // TallyList 获取所有账单
@@ -134,6 +134,7 @@ func DateList(c echo.Context) error {
 	}
 	err := c.Bind(t)
 	if err != nil {
+		fmt.Println(err)
 		return common.Fail(c, global.TallyCode, "参数错误")
 	}
 	if t.StarTime > t.EndTime {
@@ -141,9 +142,8 @@ func DateList(c echo.Context) error {
 	}
 	star := time.Unix(t.StarTime, 0)
 	end := time.Unix(t.EndTime, 0)
-	fmt.Println(star, end)
-	//redis
-	val := global.Global.Redis.Get(global.Global.Ctx, userIdentity+star.String()+end.String()).Val()
+	val := global.Global.Redis.Get(global.Global.Ctx, userIdentity+strconv.FormatInt(t.EndTime, 10)).Val()
+	fmt.Println("val", val)
 	if val != "" {
 		var vals []models.Tally
 		err := json.Unmarshal([]byte(val), &vals)
@@ -156,7 +156,7 @@ func DateList(c echo.Context) error {
 		if list == nil {
 			//没查到，防止穿透
 			go func() {
-				global.Global.Redis.Set(global.Global.Ctx, userIdentity+star.String()+end.String(), "null", 0)
+				global.Global.Redis.Set(global.Global.Ctx, userIdentity+strconv.FormatInt(t.EndTime, 10), "null", time.Duration(utils.GetRandom(10))*time.Minute)
 			}()
 			return common.Fail(c, global.TallyCode, "查询失败")
 		}
@@ -165,7 +165,7 @@ func DateList(c echo.Context) error {
 			if err != nil {
 				return
 			}
-			global.Global.Redis.Set(global.Global.Ctx, userIdentity+star.String()+end.String(), marshal, 0)
+			global.Global.Redis.Set(global.Global.Ctx, userIdentity+strconv.FormatInt(t.EndTime, 10), marshal, time.Duration(utils.GetRandom(10))*time.Minute)
 		}()
 		return common.Ok(c, list)
 	}
