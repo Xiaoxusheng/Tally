@@ -6,9 +6,10 @@ mysql:
   username: "root"
   password: "admin123"
   database: "talk"
+  url: "127.0.0.1"
 
 redis:
-  addr: ""
+  addr: "47.113.189.23:6379"
   db: 0
   password: "admin123"
   poolsize: 1000
@@ -19,5 +20,5 @@ redis:
 
 jwt:
   time: 12
-  key:  "welcome to use Cloud-kAuth:Mr.Lei"
+  key: "welcome to use Tally by Mr.Lei"
 
