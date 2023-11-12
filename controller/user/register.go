@@ -14,7 +14,7 @@ import (
 type RegisterUser struct {
 	Username string `json:"username"  form:"username"  validate:"min=5,max=10"`
 	Password string `json:"password"  form:"password" validate:"min=5,max=10"`
-	Phone    string `json:"phone" form:"phone" validate:"required"`
+	Phone    string `json:"phone" form:"phone" validate:"required,phone"`
 }
 
 func Register(c echo.Context) error {

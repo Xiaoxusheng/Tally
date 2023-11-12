@@ -8,7 +8,7 @@ mysql:
   database: "talk"
 
 redis:
-  addr: "47.113.189.23:6379"
+  addr: ""
   db: 0
   password: "admin123"
   poolsize: 1000

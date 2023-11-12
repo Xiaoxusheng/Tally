@@ -11,8 +11,8 @@ import (
 )
 
 type Kind struct {
-	Name         string `json:"name,omitempty" query:"name" form:"name" param:"name"`
-	SerialNumber int    `json:"serialNumber,omitempty" query:"serialNumber" form:"serialNumber" param:"serialNumber"`
+	Name         string `json:"name,omitempty" query:"name" form:"name" param:"name" validate:"name"`
+	SerialNumber int    `json:"serialNumber,omitempty" query:"serialNumber" form:"serialNumber" param:"serialNumber"  validate:"required"`
 }
 
 func AddKind(c echo.Context) error {
