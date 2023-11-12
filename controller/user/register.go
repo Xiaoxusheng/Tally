@@ -21,7 +21,7 @@ func Register(c echo.Context) error {
 	user := new(RegisterUser)
 	err := c.Bind(user)
 	if err != nil {
-		return common.Fail(c, global.UserCode, "解析失败！")
+		return common.Fail(c, global.UserCode, global.ParseErr)
 	}
 	err = c.Validate(user)
 	if err != nil {

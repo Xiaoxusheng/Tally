@@ -27,9 +27,9 @@ type Time struct {
 
 // TallyList 获取所有账单
 func TallyList(c echo.Context) error {
-	id, ok := c.Get("identity").(string)
-	if !ok {
-		return common.Fail(c, global.TallyCode, "获取失败")
+	id := utils.GetIdentity(c, "identity")
+	if id == "" {
+		return common.Fail(c, global.TallyCode, global.UserIdentityErr)
 	}
 	//缓存中获取
 	val := global.Global.Redis.Get(global.Global.Ctx, id+"list").Val()
@@ -44,7 +44,7 @@ func TallyList(c echo.Context) error {
 	} else {
 		list := dao.GetTallyList(id)
 		if list == nil {
-			return common.Fail(c, global.TallyCode, "获取失败")
+			return common.Fail(c, global.TallyCode, global.UserIdentityErr)
 		}
 		go func() {
 			marshal, err := json.Marshal(list)
@@ -64,11 +64,11 @@ func AddTallyLog(c echo.Context) error {
 	t := new(List)
 	userIdentity := utils.GetIdentity(c, "identity")
 	if userIdentity == "" {
-		return common.Fail(c, global.TallyCode, "获取失败")
+		return common.Fail(c, global.TallyCode, global.UserIdentityErr)
 	}
 	err := c.Bind(t)
 	if err != nil {
-		return common.Fail(c, global.TallyCode, "参数错误")
+		return common.Fail(c, global.TallyCode, global.ParseErr)
 	}
 	err = dao.InsertTally(&models.Tally{
 		Identity:     utils.GetUidV4(),
@@ -94,7 +94,7 @@ func AllotKind(c echo.Context) error {
 	category := c.QueryParam("category")
 	userIdentity := utils.GetIdentity(c, "identity")
 	if userIdentity == "" {
-		return common.Fail(c, global.TallyCode, "获取失败")
+		return common.Fail(c, global.TallyCode, global.UserIdentityErr)
 	}
 	//解决数据不一致问题
 	val := global.Global.Redis.Get(global.Global.Ctx, userIdentity+category).Val()
@@ -130,12 +130,12 @@ func DateList(c echo.Context) error {
 	t := new(Time)
 	userIdentity := utils.GetIdentity(c, "identity")
 	if userIdentity == "" {
-		return common.Fail(c, global.TallyCode, "获取失败")
+		return common.Fail(c, global.TallyCode, global.UserIdentityErr)
 	}
 	err := c.Bind(t)
 	if err != nil {
 		fmt.Println(err)
-		return common.Fail(c, global.TallyCode, "参数错误")
+		return common.Fail(c, global.TallyCode, global.ParseErr)
 	}
 	if t.StarTime > t.EndTime {
 		return common.Fail(c, global.TallyCode, "时间错误")
@@ -176,12 +176,12 @@ func BindKind(c echo.Context) error {
 	category, err := strconv.Atoi(c.QueryParam("category"))
 	if err != nil {
 		fmt.Println(err)
-		return common.Fail(c, global.TallyCode, "转换失败")
+		return common.Fail(c, global.TallyCode, global.ParseErr)
 	}
 	id := c.QueryParam("identity ")
 	useIdentity := utils.GetIdentity(c, "identity")
 	if useIdentity == "" {
-		return common.Fail(c, global.TallyCode, "获取失败")
+		return common.Fail(c, global.TallyCode, global.UserIdentityErr)
 	}
 	if ok := dao.GetByKind(category); !ok {
 		return common.Fail(c, global.TallyCode, "分类不存在")

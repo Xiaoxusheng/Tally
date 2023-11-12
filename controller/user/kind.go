@@ -19,7 +19,7 @@ func AddKind(c echo.Context) error {
 	k := new(Kind)
 	err := c.Bind(k)
 	if err != nil {
-		return common.Fail(c, global.KindCode, "参数错误")
+		return common.Fail(c, global.KindCode, global.ParseErr)
 	}
 	err = dao.InsertKind(&models.Kind{
 		Name:         k.Name,

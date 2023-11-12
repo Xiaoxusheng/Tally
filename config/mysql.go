@@ -9,7 +9,7 @@ import (
 )
 
 func InitMysql() {
-	dsn := Config.Mysql.Username + ":" + Config.Mysql.Password + "@tcp(127.0.0.1:3306)/" + Config.Mysql.Database + "?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := Config.Mysql.Username + ":" + Config.Mysql.Password + "@tcp(" + Config.Mysql.Url + ")/" + Config.Mysql.Database + "?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Silent),
 	})

@@ -22,7 +22,7 @@ func Login(c echo.Context) error {
 	user := new(User)
 	err := c.Bind(user)
 	if err != nil {
-		return common.Fail(c, global.UserCode, "解析错误！")
+		return common.Fail(c, global.UserCode, global.ParseErr)
 	}
 	err = c.Validate(user)
 	if err != nil {
@@ -68,7 +68,7 @@ func Login(c echo.Context) error {
 func Logout(c echo.Context) error {
 	identity := utils.GetIdentity(c, "identity")
 	if identity == "" {
-		return common.Fail(c, global.UserCode, "获取失败")
+		return common.Fail(c, global.UserCode, global.UserIdentityErr)
 	}
 	//删除token
 	val := global.Global.Redis.Del(global.Global.Ctx, identity).Val()
@@ -81,7 +81,7 @@ func Logout(c echo.Context) error {
 func Info(c echo.Context) error {
 	identity := utils.GetIdentity(c, "identity")
 	if identity == "" {
-		return common.Fail(c, global.UserCode, "获取失败")
+		return common.Fail(c, global.UserCode, global.UserIdentityErr)
 	}
 	//redis获取
 	val := global.Global.Redis.Get(global.Global.Ctx, identity+"info").Val()

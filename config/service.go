@@ -19,6 +19,7 @@ type Mysql struct {
 	Database string `json:"database" yaml:"database"`
 	Username string `json:"username" yaml:"username"`
 	Password string `json:"password" yaml:"password"`
+	Url      string `json:"url" yaml:"url"`
 }
 
 // redis

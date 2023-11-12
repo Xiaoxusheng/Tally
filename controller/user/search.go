@@ -20,7 +20,7 @@ func Search(c echo.Context) error {
 	s := new(Searches)
 	err := c.Bind(s)
 	if err != nil {
-		return common.Fail(c, global.SearchCode, "转换失败")
+		return common.Fail(c, global.SearchCode, global.ParseErr)
 	}
 
 	if s.Remark != "" {
