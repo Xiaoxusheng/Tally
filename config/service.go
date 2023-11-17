@@ -38,12 +38,19 @@ type Jwt struct {
 	Key  string
 	Time time.Duration
 }
+type Logs struct {
+	Leave   string `json:"leave,omitempty" yaml:"leave"`
+	Prefix  string `json:"prefix,omitempty" yaml:"prefix"`
+	Path    string `json:"path,omitempty" yaml:"path"`
+	Maxsize int    `json:"maxsize,omitempty" yaml:"maxsize"`
+}
 
 type Configs struct {
 	Service Service
 	Mysql   Mysql
 	Redis   Redis
 	Jwt     Jwt
+	Logs    Logs
 }
 
 var Config Configs

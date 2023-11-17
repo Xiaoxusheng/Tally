@@ -48,7 +48,7 @@ func Login(c echo.Context) error {
 			//数据库中获取
 			ok := dao.GetUserById(user.Username, utils.Md5(user.Password))
 			if ok == nil {
-				return common.Fail(c, global.UserCode, "用户名或密码错误")
+				return common.Fail(c, global.UserCode, global.LoginErr)
 			}
 			token := utils.GetToken(ok.Identity)
 			//异步更新

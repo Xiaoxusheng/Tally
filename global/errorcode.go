@@ -18,3 +18,10 @@ const (
 	CollectErr      = "账单不存在！"
 	CollectToErr    = "收藏失败！"
 )
+
+const (
+	Red    = 31
+	Yellow = 33
+	Blue   = 36
+	Gray   = 37
+)

@@ -2,6 +2,7 @@ package main
 
 import (
 	"Tally/config"
+	"Tally/global"
 	"Tally/router"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -15,6 +16,10 @@ func main() {
 	config.InitMysql()
 	//连接redis
 	config.InitRedis()
+	//log初始化
+	config.InitLog()
+	global.Global.Log.Warn("服务启动成功")
+
 	e := echo.New()
 	e.Debug = true
 

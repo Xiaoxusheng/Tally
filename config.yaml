@@ -9,7 +9,7 @@ mysql:
   url: "127.0.0.1"
 
 redis:
-  addr: ""
+  addr: "47.113.189.23:6379"
   db: 0
   password: "admin123"
   poolsize: 1000
@@ -20,5 +20,10 @@ redis:
 
 jwt:
   time: 12
-  key: "welcome to use Tally by Mr.Lei"
+  key: "welcome to use Tally by M"
 
+Logs:
+  leave: "info"
+  prefix: "Tally"
+  path: "./logs"
+  maxsize: 100
