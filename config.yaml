@@ -17,7 +17,6 @@ redis:
   minidleconns: 10
   connMaxIdleTime: 10
 
-
 jwt:
   time: 12
   key: "welcome to use Tally by M"
@@ -27,3 +26,11 @@ Logs:
   prefix: "Tally"
   path: "./logs"
   maxsize: 100
+
+oauth2:
+  clientID: ""
+  clientSecret: ""
+  authURL: ""
+  tokenURL: ""
+  redirectURL: ""
+  scopes: ""
