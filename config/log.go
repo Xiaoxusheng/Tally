@@ -54,7 +54,7 @@ func (l *Log) Write(p []byte) (n int, err error) {
 	return n, err
 }
 
-func (l *Log) logFile(m *log.Logger) {
+func logFile(m *log.Logger) {
 	t := time.Now().Format(time.DateTime)
 	//创建文件
 	file, err := os.Create(t + ".log")
@@ -68,24 +68,26 @@ func (l *Log) logFile(m *log.Logger) {
 		}
 	}(file)
 	s := time.NewTicker(time.Minute * 60)
-	ls := new(Log)
-	ls.w = file
+	l := new(Log)
+	l.w = file
 	//输出到控制台
-	m.SetOutput(io.MultiWriter(os.Stdout, ls.w))
-	for {
-		select {
-		case <-s.C:
-			//	判读是否超过100m
-			if l.m > 100*(1024*1024) {
-				t = time.Now().Format(time.DateTime)
-				file, err = os.Create(t + ".log")
-				ls = new(Log)
-				ls.w = file
-				//输出到控制台,日志文件中
-				m.SetOutput(io.MultiWriter(os.Stdout, ls.w))
+	m.SetOutput(io.MultiWriter(os.Stdout, l.w))
+	go func() {
+		for {
+			select {
+			case <-s.C:
+				//	判读是否超过100m
+				if l.m > 100*(1024*1024) {
+					t = time.Now().Format(time.DateTime)
+					file, err = os.Create(t + ".log")
+					l = new(Log)
+					l.w = file
+					//输出到控制台,日志文件中
+					m.SetOutput(io.MultiWriter(os.Stdout, l.w))
+				}
 			}
 		}
-	}
+	}()
 
 }
 
@@ -95,6 +97,7 @@ func InitLog() {
 	//自定义输出
 	m.SetFormatter(&Log{})
 
+	logFile(m)
 	//输出任务和行号
 	m.SetReportCaller(true)
 	//最低输出级别
