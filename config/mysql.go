@@ -5,7 +5,6 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"log"
 )
 
 func InitMysql() {
@@ -17,7 +16,7 @@ func InitMysql() {
 		panic(err)
 	}
 	db.Debug()
-	log.Println("mysql初始化成功")
+	global.Global.Log.Info("mysql初始化成功")
 	global.Global.Mysql = db
 	//f := sync.Once{}
 	//f.Do(

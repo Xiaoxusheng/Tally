@@ -9,8 +9,7 @@ import (
 	"path"
 )
 
-type Log struct {
-}
+type Log struct{}
 
 func (l *Log) Format(f *log.Entry) ([]byte, error) {
 	var leave int

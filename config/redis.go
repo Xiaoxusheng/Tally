@@ -4,7 +4,6 @@ import (
 	"Tally/global"
 	"context"
 	"github.com/redis/go-redis/v9"
-	"log"
 	"time"
 )
 
@@ -21,12 +20,13 @@ func InitRedis() {
 	ctx := context.Background()
 	res, err := rdb.Ping(ctx).Result()
 	if err != nil {
-		log.Println(err)
+		global.Global.Log.Error(err)
 		return
 	}
 	if res == "PONG" {
-		log.Println("redis连接成功!")
+		global.Global.Log.Info("redis连接成功!")
 	}
+
 	global.Global.Redis = rdb
 	global.Global.Ctx = ctx
 }

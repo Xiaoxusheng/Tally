@@ -193,3 +193,15 @@ func BindKind(c echo.Context) error {
 
 	return common.Ok(c, nil)
 }
+
+// Analysis 分析
+func Analysis(c echo.Context) error {
+	//获取
+	list := make([]models.Tally, 0)
+	err := c.Bind(list)
+	if err != nil {
+		return common.Fail(c, global.TallyCode, global.ParseErr)
+	}
+
+	return nil
+}

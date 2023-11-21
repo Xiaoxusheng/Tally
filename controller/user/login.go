@@ -10,6 +10,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/labstack/echo/v4"
+	"golang.org/x/oauth2"
+	"io"
 	"time"
 )
 
@@ -129,4 +131,44 @@ func ChangePwd(c echo.Context) error {
 	}()
 	//删除缓存
 	return common.Ok(c, nil)
+}
+
+// OAuthLogin OAuth2 认证
+func OAuthLogin(c echo.Context) error {
+	configs := utils.NewOauth2()
+	url := configs.AuthCodeURL(utils.GetLetter(), oauth2.SetAuthURLParam("grant_type", "Authorization Code Grant"))
+	return common.Ok(c, url)
+}
+
+func Token(c echo.Context) error {
+	code := c.QueryParam("code")
+	global.Global.Log.Info(code)
+	configs := utils.NewOauth2()
+	token, err := configs.Exchange(global.Global.Ctx, code, oauth2.SetAuthURLParam("grant_type", "Authorization Code Grant"))
+	if err != nil {
+		global.Global.Log.Warn(err)
+		return common.Fail(c, global.UserCode, "获取token失败")
+	}
+	global.Global.Log.Info(token)
+	//global.Global.Redis.Set(global.Global.Ctx, token.AccessToken, token.RefreshToken)
+
+	client := oauth2.NewClient(global.Global.Ctx, oauth2.StaticTokenSource(token))
+	get, err := client.Get("https://api.github.com/user")
+	if err != nil {
+		global.Global.Log.Warn(err)
+		return err
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			global.Global.Log.Warn(err)
+		}
+	}(get.Body)
+	all, err := io.ReadAll(get.Body)
+	if err != nil {
+		global.Global.Log.Warn(err)
+		return err
+	}
+	return common.Ok(c, string(all))
+
 }

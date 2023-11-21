@@ -1,6 +1,7 @@
 package config
 
 import (
+	"Tally/global"
 	"fmt"
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
@@ -44,6 +45,14 @@ type Logs struct {
 	Path    string `json:"path,omitempty" yaml:"path"`
 	Maxsize int    `json:"maxsize,omitempty" yaml:"maxsize"`
 }
+type Oauth2 struct {
+	ClientID     string `json:"clientID,omitempty" yaml:"clientID"`
+	ClientSecret string `json:"clientSecret,omitempty" yaml:"clientSecret"`
+	AuthURL      string `json:"authURL,omitempty" yaml:"authURL"`
+	TokenURL     string `json:"tokenURL,omitempty" yaml:"tokenURL"`
+	RedirectURL  string `json:"redirectURL,omitempty" yaml:"redirectURL"`
+	Scopes       string `json:"scopes,omitempty" yaml:"scopes"`
+}
 
 type Configs struct {
 	Service Service
@@ -51,6 +60,7 @@ type Configs struct {
 	Redis   Redis
 	Jwt     Jwt
 	Logs    Logs
+	Oauth2  Oauth2
 }
 
 var Config Configs
@@ -63,7 +73,7 @@ func InitService() {
 	}
 	err = viper.Unmarshal(&Config)
 	if err != nil {
-		log.Println("初始化失败")
+		global.Global.Log.Error("初始化失败")
 		return
 	}
 
@@ -76,6 +86,5 @@ func InitService() {
 		}
 		fmt.Println(Config)
 	})
-	fmt.Println(Config)
 	viper.WatchConfig()
 }

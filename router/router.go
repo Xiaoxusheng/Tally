@@ -15,7 +15,10 @@ func Routers(e *echo.Echo) {
 	//middleware.Recover()
 	e.POST("/user/login", user.Login)
 	e.POST("/user/register", user.Register)
+	e.GET("/oauth/redirect", user.Token)
+
 	users := e.Group("/user")
+	users.GET("/auth2_login", user.OAuthLogin)
 	users.Use(m.ParseToken())
 	users.GET("/list", user.TallyList)
 	users.GET("/info", user.Info)
@@ -31,5 +34,4 @@ func Routers(e *echo.Echo) {
 	users.GET("/add_collect", user.AddCollect)
 	users.GET("/del_collect", user.DeleteCollect)
 	users.GET("/collect_list", user.CollectList)
-
 }

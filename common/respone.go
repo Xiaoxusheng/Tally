@@ -14,3 +14,7 @@ func Ok(c echo.Context, data any) error {
 func Fail(c echo.Context, code int, msg string) error {
 	return c.JSON(http.StatusOK, map[string]interface{}{"code": code, "data": nil, "msg": msg})
 }
+
+func Html(c echo.Context, code int, msg string) error {
+	return c.HTML(code, msg)
+}

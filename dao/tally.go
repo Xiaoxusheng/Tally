@@ -4,6 +4,7 @@ import (
 	"Tally/global"
 	"Tally/models"
 	"fmt"
+	"net/http"
 )
 
 func GetTallyList(id string) []*models.Tally {
@@ -32,6 +33,7 @@ func GetTallyKind(identity string, n int) []*models.Tally {
 		fmt.Println(err)
 		return nil
 	}
+	http.ListenAndServe(":80", nil)
 	return list
 }
 
