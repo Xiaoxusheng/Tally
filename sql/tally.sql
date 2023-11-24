@@ -48,12 +48,9 @@ create table user_basic
     ip         varchar(64) not null,
     constraint identity
         unique (identity),
-    constraint identity_2
-        unique (identity),
     constraint phone
         unique (phone),
-    constraint phone_2
-        unique (phone)
+
 );
 
 create index idx_user_basic_deleted_at

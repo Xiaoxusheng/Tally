@@ -36,7 +36,7 @@ jwt:
 ### 3 启动服务
 #### 1.下载依赖
 ```shell
-go mod tiay
+go mod tidy
 ```
 #### 2.运行
 ```shell

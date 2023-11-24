@@ -9,7 +9,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/labstack/echo/v4"
+	"io"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -198,10 +200,75 @@ func BindKind(c echo.Context) error {
 func Analysis(c echo.Context) error {
 	//获取
 	list := make([]models.Tally, 0)
-	err := c.Bind(list)
+	err := c.Bind(&list)
+	if err != nil {
+		fmt.Println(err)
+		return common.Fail(c, global.TallyCode, global.ParseErr)
+	}
+	fmt.Println(list)
+	//使用星火大模型分析
+	marshal, err := json.Marshal(list)
 	if err != nil {
 		return common.Fail(c, global.TallyCode, global.ParseErr)
 	}
+	//流式响应
+	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextPlain)
+	c.Response().Header().Set(echo.HeaderContentDisposition, "attachment; filename=stream.txt")
 
+	conn := utils.GetConnect(marshal)
+
+	var answer = ""
+	//获取返回的数据
+	for {
+		_, msg, err := conn.ReadMessage()
+		if err != nil {
+			fmt.Println("read message error:", err)
+			break
+		}
+
+		var data map[string]interface{}
+		err1 := json.Unmarshal(msg, &data)
+		if err1 != nil {
+			fmt.Println("Error parsing JSON:", err)
+			return common.Fail(c, global.TallyCode, global.ParseErr)
+		}
+		fmt.Println(string(msg))
+		//解析数据
+		payload := data["payload"].(map[string]interface{})
+		choices := payload["choices"].(map[string]interface{})
+		header := data["header"].(map[string]interface{})
+		code := header["code"].(float64)
+
+		if code != 0 {
+			fmt.Println(data["payload"])
+			return common.Fail(c, global.TallyCode, global.ParseErr)
+
+		}
+		status := choices["status"].(float64)
+		fmt.Println(status)
+		text := choices["text"].([]interface{})
+
+		content := text[0].(map[string]interface{})["content"].(string)
+		if status != 2 {
+			//answer += content
+			_, err = io.Copy(c.Response(), strings.NewReader(content))
+			if err != nil {
+				fmt.Println(err)
+				return err
+			}
+		} else {
+			fmt.Println("收到最终结果")
+			answer += content
+			usage := payload["usage"].(map[string]interface{})
+			temp := usage["text"].(map[string]interface{})
+			totalTokens := temp["total_tokens"].(float64)
+			fmt.Println("total_tokens:", totalTokens)
+			conn.Close()
+			break
+		}
+
+	}
+	//输出返回结果
+	fmt.Println(answer)
 	return nil
 }

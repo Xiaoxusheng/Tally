@@ -13,6 +13,7 @@ func Routers(e *echo.Echo) {
 	e.Validator = &utils.CustomValidator{Validator: validator.New()}
 	e.Use(middleware.Logger(), middleware.CORS(), middleware.Timeout())
 	//middleware.Recover()
+
 	e.POST("/user/login", user.Login)
 	e.POST("/user/register", user.Register)
 	e.GET("/oauth/redirect", user.Token)
@@ -34,4 +35,5 @@ func Routers(e *echo.Echo) {
 	users.GET("/add_collect", user.AddCollect)
 	users.GET("/del_collect", user.DeleteCollect)
 	users.GET("/collect_list", user.CollectList)
+	users.GET("/analysis", user.Analysis)
 }

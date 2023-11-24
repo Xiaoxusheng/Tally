@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/oauth2"
-	"io"
 	"time"
 )
 
@@ -149,26 +148,31 @@ func Token(c echo.Context) error {
 		global.Global.Log.Warn(err)
 		return common.Fail(c, global.UserCode, "获取token失败")
 	}
+	//注册新用户
+
+	//换取本地token
+	//utils.GetToken()
+
 	global.Global.Log.Info(token)
 	//global.Global.Redis.Set(global.Global.Ctx, token.AccessToken, token.RefreshToken)
+	return common.Ok(c, token)
 
-	client := oauth2.NewClient(global.Global.Ctx, oauth2.StaticTokenSource(token))
-	get, err := client.Get("https://api.github.com/user")
-	if err != nil {
-		global.Global.Log.Warn(err)
-		return err
-	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			global.Global.Log.Warn(err)
-		}
-	}(get.Body)
-	all, err := io.ReadAll(get.Body)
-	if err != nil {
-		global.Global.Log.Warn(err)
-		return err
-	}
-	return common.Ok(c, string(all))
+	//client := oauth2.NewClient(global.Global.Ctx, oauth2.StaticTokenSource(token))
+	//get, err := client.Get("https://api.github.com/user")
+	//if err != nil {
+	//	global.Global.Log.Warn(err)
+	//	return err
+	//}
+	//defer func(Body io.ReadCloser) {
+	//	err := Body.Close()
+	//	if err != nil {
+	//		global.Global.Log.Warn(err)
+	//	}
+	//}(get.Body)
+	//all, err := io.ReadAll(get.Body)
+	//if err != nil {
+	//	global.Global.Log.Warn(err)
+	//	return err
+	//}
 
 }

@@ -54,13 +54,21 @@ type Oauth2 struct {
 	Scopes       string `json:"scopes,omitempty" yaml:"scopes"`
 }
 
+type SparkDesk struct {
+	Appid     string `json:"appid,omitempty"  yaml:"appid"`
+	ApiSecret string `json:"apiSecret,omitempty" yaml:"apiSecret"`
+	ApiKey    string `json:"apiKey,omitempty" yaml:"apiKey"`
+	HostUrl   string `json:"hostUrl" yaml:"hostUrl"`
+}
+
 type Configs struct {
-	Service Service
-	Mysql   Mysql
-	Redis   Redis
-	Jwt     Jwt
-	Logs    Logs
-	Oauth2  Oauth2
+	Service   Service
+	Mysql     Mysql
+	Redis     Redis
+	Jwt       Jwt
+	Logs      Logs
+	Oauth2    Oauth2
+	SparkDesk SparkDesk
 }
 
 var Config Configs
@@ -86,5 +94,6 @@ func InitService() {
 		}
 		fmt.Println(Config)
 	})
+	fmt.Println(Config)
 	viper.WatchConfig()
 }
