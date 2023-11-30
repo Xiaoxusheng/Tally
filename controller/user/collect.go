@@ -33,7 +33,7 @@ func AddCollect(c echo.Context) error {
 		return common.Fail(c, global.TallyCode, global.CollectToErr)
 	}
 	go func() {
-		global.Global.Redis.Del(global.Global.Ctx, id+"collect")
+		global.Global.Redis.Del(global.Global.Ctx, global.CollectKey+id)
 	}()
 	return common.Ok(c, nil)
 
@@ -58,7 +58,7 @@ func DeleteCollect(c echo.Context) error {
 		return common.Fail(c, global.TallyCode, global.CollectToErr)
 	}
 	go func() {
-		global.Global.Redis.Del(global.Global.Ctx, id+"collect")
+		global.Global.Redis.Del(global.Global.Ctx, global.CollectKey+id)
 	}()
 	return common.Ok(c, nil)
 }
@@ -69,7 +69,7 @@ func CollectList(c echo.Context) error {
 	if id == "" {
 		return common.Fail(c, global.TallyCode, global.UserIdentityErr)
 	}
-	val := global.Global.Redis.Get(global.Global.Ctx, id+"collect").Val()
+	val := global.Global.Redis.Get(global.Global.Ctx, global.CollectKey+id).Val()
 	if val != "" {
 		tally := make([]*models.Tally, 0)
 		err := json.Unmarshal([]byte(val), &tally)
@@ -79,6 +79,8 @@ func CollectList(c echo.Context) error {
 		return common.Ok(c, tally)
 	} else {
 		list := dao.GetCollectList(id)
+		//异步更新
+
 		return common.Ok(c, list)
 	}
 }

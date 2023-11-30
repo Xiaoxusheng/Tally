@@ -15,6 +15,7 @@ type Kind struct {
 	SerialNumber int    `json:"serialNumber,omitempty" query:"serialNumber" form:"serialNumber" param:"serialNumber"  validate:"required"`
 }
 
+// AddKind 添加种类
 func AddKind(c echo.Context) error {
 	k := new(Kind)
 	err := c.Bind(k)
@@ -28,12 +29,16 @@ func AddKind(c echo.Context) error {
 	if err != nil {
 		return common.Fail(c, global.KindCode, "添加失败")
 	}
+	//redis添加
+	//global.Global.Redis.Set(global.Global.Ctx, "kind_list", list, 0)
 	return common.Ok(c, nil)
 }
 
+// KindList 种类列表
 func KindList(c echo.Context) error {
-	val := global.Global.Redis.Get(global.Global.Ctx, "kind_list").Val()
+	val := global.Global.Redis.Get(global.Global.Ctx, global.ListKey).Val()
 	if val != "" {
+		fmt.Println("val不为空")
 		var s []models.Tally
 		err := json.Unmarshal([]byte(val), &s)
 		if err != nil {
@@ -42,9 +47,16 @@ func KindList(c echo.Context) error {
 		return common.Ok(c, s)
 	} else {
 		list := dao.GetKindList()
-		fmt.Println("list", list)
+		marshal, err := json.Marshal(list)
+		if err != nil {
+			return common.Fail(c, global.KindCode, global.MarshalErr)
+		}
 		go func() {
-			global.Global.Redis.Set(global.Global.Ctx, "kind_list", list, 0)
+			result, err := global.Global.Redis.Set(global.Global.Ctx, global.ListKey, marshal, 0).Result()
+			if err != nil {
+				return
+			}
+			fmt.Println(result, err)
 		}()
 		return common.Ok(c, list)
 	}

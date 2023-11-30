@@ -11,12 +11,18 @@ const (
 	CollectCode = 100015
 )
 
+var (
+	ListKey    = "kind_list"
+	CollectKey = "collect"
+)
+
 const (
 	LoginErr        = "用户名或密码错误！"
 	UserIdentityErr = "获取用户错误！"
 	ParseErr        = "解析失败！"
 	CollectErr      = "账单不存在！"
 	CollectToErr    = "收藏失败！"
+	MarshalErr      = "序列化失败！"
 )
 
 const (
