@@ -29,8 +29,11 @@ func AddKind(c echo.Context) error {
 	if err != nil {
 		return common.Fail(c, global.KindCode, "添加失败")
 	}
-	//redis添加
-	//global.Global.Redis.Set(global.Global.Ctx, "kind_list", list, 0)
+	//删除数据
+	go func() {
+		global.Global.Redis.Del(global.Global.Ctx, global.ListKey)
+	}()
+
 	return common.Ok(c, nil)
 }
 
@@ -39,7 +42,7 @@ func KindList(c echo.Context) error {
 	val := global.Global.Redis.Get(global.Global.Ctx, global.ListKey).Val()
 	if val != "" {
 		fmt.Println("val不为空")
-		var s []models.Tally
+		var s []models.Kind
 		err := json.Unmarshal([]byte(val), &s)
 		if err != nil {
 			return common.Fail(c, global.KindCode, "数据错误")
@@ -47,11 +50,11 @@ func KindList(c echo.Context) error {
 		return common.Ok(c, s)
 	} else {
 		list := dao.GetKindList()
-		marshal, err := json.Marshal(list)
-		if err != nil {
-			return common.Fail(c, global.KindCode, global.MarshalErr)
-		}
 		go func() {
+			marshal, err := json.Marshal(list)
+			if err != nil {
+				global.Global.Log.Warn("序列化失败！")
+			}
 			result, err := global.Global.Redis.Set(global.Global.Ctx, global.ListKey, marshal, 0).Result()
 			if err != nil {
 				return

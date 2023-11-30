@@ -74,12 +74,19 @@ func CollectList(c echo.Context) error {
 		tally := make([]*models.Tally, 0)
 		err := json.Unmarshal([]byte(val), &tally)
 		if err != nil {
-			return err
+			return common.Fail(c, global.CollectCode, global.ParseErr)
 		}
 		return common.Ok(c, tally)
 	} else {
 		list := dao.GetCollectList(id)
 		//异步更新
+		go func() {
+			marshal, err := json.Marshal(list)
+			if err != nil {
+				global.Global.Log.Warn("序列化失败！")
+			}
+			global.Global.Redis.Set(global.Global.Ctx, global.CollectKey, marshal, 0)
+		}()
 
 		return common.Ok(c, list)
 	}
