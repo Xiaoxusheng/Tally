@@ -11,7 +11,7 @@ import (
 )
 
 type Kind struct {
-	Name         string `json:"name,omitempty" query:"name" form:"name" param:"name" validate:"name"`
+	Name         string `json:"name,omitempty" query:"name" form:"name" param:"name" validate:"required"`
 	SerialNumber int    `json:"serialNumber,omitempty" query:"serialNumber" form:"serialNumber" param:"serialNumber"  validate:"required"`
 }
 

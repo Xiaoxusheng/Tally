@@ -34,7 +34,7 @@ func TallyList(c echo.Context) error {
 		return common.Fail(c, global.TallyCode, global.UserIdentityErr)
 	}
 	//缓存中获取
-	val := global.Global.Redis.Get(global.Global.Ctx, id+"list").Val()
+	val := global.Global.Redis.Get(global.Global.Ctx, global.TallyListKey+id).Val()
 	fmt.Println("val", val)
 	if val != "" {
 		var tally []models.Tally
@@ -53,7 +53,7 @@ func TallyList(c echo.Context) error {
 			if err != nil {
 				return
 			}
-			val, err := global.Global.Redis.Set(global.Global.Ctx, id+"list", marshal, 0).Result()
+			val, err := global.Global.Redis.Set(global.Global.Ctx, global.TallyListKey+id, marshal, 0).Result()
 			fmt.Println(val, err)
 		}()
 		return common.Ok(c, list)

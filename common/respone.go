@@ -7,7 +7,7 @@ import (
 
 // Ok 成功
 func Ok(c echo.Context, data any) error {
-	return c.JSON(http.StatusOK, map[string]interface{}{"code": 200, "data": data, "msg": "success"})
+	return c.JSON(http.StatusOK, map[string]interface{}{"code": http.StatusOK, "data": data, "msg": "success"})
 }
 
 // Fail 失败

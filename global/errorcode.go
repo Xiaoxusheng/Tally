@@ -3,17 +3,23 @@ package global
 //自定义错误
 
 const (
-	UserCode    = 100011
-	TallyCode   = 100012
-	VerifyCode  = 400000
-	KindCode    = 100013
-	SearchCode  = 100014
-	CollectCode = 100015
+	UserCode = iota + 100011
+	TallyCode
+	VerifyCode
+	KindCode
+	SearchCode
+	CollectCode
+	FileCode
+	BlogCode
+	LikesCode
 )
 
-var (
-	ListKey    = "kind_list"
-	CollectKey = "collect"
+const (
+	ListKey         = "kind_list"
+	CollectKey      = "collect"
+	TallyListKey    = "TallyList"
+	BlogLikesKey    = "blogLikes"
+	BlogSetLikesKey = "blogLikesSet"
 )
 
 const (
@@ -23,6 +29,10 @@ const (
 	CollectErr      = "账单不存在！"
 	CollectToErr    = "收藏失败！"
 	MarshalErr      = "序列化失败！"
+	FileErr         = "文件上传错误！"
+	BlogErr         = "新增博客失败！"
+	LikesErr        = "点赞失败！"
+	QueryErr        = "获取必要参数失败"
 )
 
 const (

@@ -3,6 +3,7 @@ package main
 import (
 	"Tally/config"
 	"Tally/router"
+	"Tally/utils"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"strconv"
@@ -17,6 +18,8 @@ func main() {
 	config.InitMysql()
 	//连接redis
 	config.InitRedis()
+
+	go utils.Set()
 
 	e := echo.New()
 	e.Debug = true

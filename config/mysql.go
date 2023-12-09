@@ -18,6 +18,13 @@ func InitMysql() {
 	db.Debug()
 	global.Global.Log.Info("mysql初始化成功")
 	global.Global.Mysql = db
+	//建表
+	//err = global.Global.Mysql.AutoMigrate(&models.Blog{})
+	//if err != nil {
+	//	global.Global.Log.Info(err)
+	//	return
+	//}
+	//global.Global.Mysql.AutoMigrate(&models.Comment{})
 	//f := sync.Once{}
 	//f.Do(
 	//	func() {

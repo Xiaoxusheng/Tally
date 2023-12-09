@@ -61,14 +61,21 @@ type SparkDesk struct {
 	HostUrl   string `json:"hostUrl" yaml:"hostUrl"`
 }
 
+type TencentCos struct {
+	Url       string `json:"url" yaml:"url"`
+	SecretId  string `json:"secretId,omitempty"  yaml:"secretId"`
+	SecretKey string `json:"secretKey,omitempty" yaml:"secretKey"`
+}
+
 type Configs struct {
-	Service   Service
-	Mysql     Mysql
-	Redis     Redis
-	Jwt       Jwt
-	Logs      Logs
-	Oauth2    Oauth2
-	SparkDesk SparkDesk
+	Service    Service
+	Mysql      Mysql
+	Redis      Redis
+	Jwt        Jwt
+	Logs       Logs
+	Oauth2     Oauth2
+	SparkDesk  SparkDesk
+	TencentCos TencentCos
 }
 
 var Config Configs
