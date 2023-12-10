@@ -2,6 +2,7 @@ package utils
 
 import (
 	"Tally/config"
+	"Tally/global"
 	"context"
 	"github.com/tencentyun/cos-go-sdk-v5"
 	"mime/multipart"
@@ -10,8 +11,10 @@ import (
 	"path"
 )
 
-func Upload(file *multipart.FileHeader) (string, error) {
+func Upload(file *multipart.FileHeader, c chan global.UrlList, index int) {
 	//上传
+	global.Global.Log.Info("第", index, "个文件上传")
+
 	u, _ := url.Parse(config.Config.TencentCos.Url)
 	b := &cos.BaseURL{BucketURL: u}
 	client := cos.NewClient(b, &http.Client{
@@ -32,7 +35,15 @@ func Upload(file *multipart.FileHeader) (string, error) {
 	files, err := file.Open()
 	_, err = client.Object.Put(context.Background(), key, files, opt)
 	if err != nil {
-		return "", err
+		c <- global.UrlList{
+			Url:   "",
+			Index: index,
+		}
+		return
 	}
-	return config.Config.TencentCos.Url + key, nil
+	c <- global.UrlList{
+		Url:   config.Config.TencentCos.Url + key,
+		Index: index,
+	}
+	global.Global.Log.Info("上传完成")
 }

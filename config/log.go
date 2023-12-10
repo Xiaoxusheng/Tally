@@ -14,7 +14,7 @@ import (
 )
 
 type Log struct {
-	w    io.Writer
+	io.Writer
 	m    int
 	lock sync.Mutex
 }
@@ -54,7 +54,7 @@ func (l *Log) Format(f *log.Entry) ([]byte, error) {
 func (l *Log) Write(p []byte) (n int, err error) {
 	l.lock.Lock()
 	defer l.lock.Unlock()
-	n, err = l.w.Write(p)
+	n, err = l.Writer.Write(p)
 	l.m += n
 	fmt.Println("大小", l.m)
 	return n, err
@@ -70,10 +70,13 @@ func logFile(m *log.Logger) {
 	}
 	fmt.Println("创建成功")
 	s := time.NewTicker(time.Minute * 60)
-	l := new(Log)
-	l.w = file
+	l := &Log{
+		Writer: file,
+		m:      0,
+		lock:   sync.Mutex{},
+	}
 	//输出到控制台
-	m.SetOutput(io.MultiWriter(os.Stdout, l.w))
+	m.SetOutput(io.MultiWriter(os.Stdout, l.Writer))
 	go func() {
 		for {
 			select {
@@ -83,10 +86,13 @@ func logFile(m *log.Logger) {
 					file.Close()
 					t = strings.ReplaceAll(time.Now().Format(time.DateOnly+"-"+time.TimeOnly), ":", "-")
 					file, err = os.Open(t + ".log")
-					l = new(Log)
-					l.w = file
+					l := &Log{
+						Writer: file,
+						m:      0,
+						lock:   sync.Mutex{},
+					}
 					//输出到控制台,日志文件中
-					m.SetOutput(io.MultiWriter(os.Stdout, l.w))
+					m.SetOutput(io.MultiWriter(os.Stdout, l.Writer))
 				}
 			}
 		}

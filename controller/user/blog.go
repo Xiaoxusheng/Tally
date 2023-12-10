@@ -17,21 +17,32 @@ type Blog struct {
 
 // Upload 上传文件
 func Upload(c echo.Context) error {
-	var url string
+	list := make([]global.UrlList, 0, 9)
+	n := 0
 	form, err := c.MultipartForm()
 	if err != nil {
 		global.Global.Log.Warn("上传失败" + err.Error())
 		return common.Fail(c, global.FileCode, global.FileErr)
 	}
-	for i, r := range form.File["file"] {
-		url, err = utils.Upload(r)
-		if err != nil {
-			global.Global.Log.Warn("上传cos失败" + err.Error())
-			return common.Fail(c, global.FileCode, global.FileErr)
-		}
-		global.Global.Log.Info("第", i+1, "个文件上传", url)
+	if len(form.File["file"]) > 9 {
+		return common.Fail(c, global.FileCode, global.FileErr)
 	}
-	return common.Ok(c, url)
+	urlChan := make(chan global.UrlList, 9)
+	for i, r := range form.File["file"] {
+		go utils.Upload(r, urlChan, i+1)
+	}
+	for n != len(form.File["file"]) {
+		select {
+		case s := <-urlChan:
+			if s.Url != "" {
+				n++
+				list = append(list, s)
+				continue
+			}
+			n++
+		}
+	}
+	return common.Ok(c, list)
 }
 
 // BlogText 记账博客
@@ -85,7 +96,7 @@ func Likes(c echo.Context) error {
 		if err != nil {
 			return common.Fail(c, global.LikesCode, global.LikesErr)
 		}
-		return common.Fail(c, global.LikesCode, global.LikesErr)
+		return common.Fail(c, global.LikesCode, global.LikesAlreadyErr)
 	}
 	//添加进集合
 	result, err := global.Global.Redis.SAdd(global.Global.Ctx, global.BlogSetLikesKey+blogId, id).Result()
@@ -102,4 +113,7 @@ func Likes(c echo.Context) error {
 	return common.Ok(c, nil)
 }
 
-// 博客列表
+// BlogList 博客列表
+func BlogList(c echo.Context) error {
+	return common.Ok(c, nil)
+}

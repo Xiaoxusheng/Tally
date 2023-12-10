@@ -59,7 +59,7 @@ func KindList(c echo.Context) error {
 			if err != nil {
 				return
 			}
-			fmt.Println(result, err)
+			global.Global.Log.Warn(result, err)
 		}()
 		return common.Ok(c, list)
 	}

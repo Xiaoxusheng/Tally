@@ -32,6 +32,7 @@ const (
 	FileErr         = "文件上传错误！"
 	BlogErr         = "新增博客失败！"
 	LikesErr        = "点赞失败！"
+	LikesAlreadyErr = "已经点赞！"
 	QueryErr        = "获取必要参数失败"
 )
 
