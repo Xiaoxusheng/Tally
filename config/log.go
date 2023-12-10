@@ -8,12 +8,15 @@ import (
 	"io"
 	"os"
 	"path"
+	"strings"
+	"sync"
 	"time"
 )
 
 type Log struct {
-	w io.Writer
-	m int
+	w    io.Writer
+	m    int
+	lock sync.Mutex
 }
 
 func (l *Log) Format(f *log.Entry) ([]byte, error) {
@@ -49,24 +52,23 @@ func (l *Log) Format(f *log.Entry) ([]byte, error) {
 
 // 这个是重写
 func (l *Log) Write(p []byte) (n int, err error) {
+	l.lock.Lock()
+	defer l.lock.Unlock()
 	n, err = l.w.Write(p)
 	l.m += n
+	fmt.Println("大小", l.m)
 	return n, err
 }
 
 func logFile(m *log.Logger) {
-	t := time.Now().Format(time.DateTime)
+	t := time.Now().Format(time.DateOnly)
 	//创建文件
-	file, err := os.Create(t + ".log")
+	file, err := os.OpenFile(t+".log", os.O_CREATE|os.O_APPEND, 0755)
 	if err != nil {
+		log.Println(err)
 		return
 	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-
-		}
-	}(file)
+	fmt.Println("创建成功")
 	s := time.NewTicker(time.Minute * 60)
 	l := new(Log)
 	l.w = file
@@ -78,8 +80,9 @@ func logFile(m *log.Logger) {
 			case <-s.C:
 				//	判读是否超过100m
 				if l.m > 100*(1024*1024) {
-					t = time.Now().Format(time.DateTime)
-					file, err = os.Create(t + ".log")
+					file.Close()
+					t = strings.ReplaceAll(time.Now().Format(time.DateOnly+"-"+time.TimeOnly), ":", "-")
+					file, err = os.Open(t + ".log")
 					l = new(Log)
 					l.w = file
 					//输出到控制台,日志文件中
@@ -94,9 +97,9 @@ func logFile(m *log.Logger) {
 func InitLog() {
 	m := log.New()
 
-	//自定义输出
+	////自定义输出
 	m.SetFormatter(&Log{})
-
+	//写入文件
 	logFile(m)
 	//输出任务和行号
 	m.SetReportCaller(true)

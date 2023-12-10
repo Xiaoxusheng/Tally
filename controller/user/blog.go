@@ -81,7 +81,7 @@ func Likes(c echo.Context) error {
 		//删除
 		global.Global.Redis.SRem(global.Global.Ctx, global.BlogSetLikesKey+blogId, id)
 		res, err := global.Global.Redis.IncrBy(global.Global.Ctx, global.BlogLikesKey+blogId, -1).Result()
-		fmt.Println(res, err)
+		global.Global.Log.Info(res, err)
 		if err != nil {
 			return common.Fail(c, global.LikesCode, global.LikesErr)
 		}
@@ -89,15 +89,17 @@ func Likes(c echo.Context) error {
 	}
 	//添加进集合
 	result, err := global.Global.Redis.SAdd(global.Global.Ctx, global.BlogSetLikesKey+blogId, id).Result()
-	fmt.Println("reslu", result)
+	global.Global.Log.Info("reslu", result)
 	if err != nil {
 		return err
 	}
 	//加1
 	res, err := global.Global.Redis.IncrBy(global.Global.Ctx, global.BlogLikesKey+blogId, 1).Result()
-	fmt.Println(res, err)
+	global.Global.Log.Info(res, err)
 	if err != nil {
 		return common.Fail(c, global.LikesCode, global.LikesErr)
 	}
 	return common.Ok(c, nil)
 }
+
+// 博客列表

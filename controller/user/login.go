@@ -40,7 +40,7 @@ func Login(c echo.Context) error {
 	} else {
 		token := utils.GetToken(val)
 		if val != "" {
-			fmt.Println("identity得值", val)
+			global.Global.Log.Info("identity的值", val)
 			go func() {
 				global.Global.Redis.Set(global.Global.Ctx, val, token, config.Config.Jwt.Time*time.Hour)
 			}()
