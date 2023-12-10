@@ -7,16 +7,19 @@
 ### 2 配置文件config,yaml,修改配置
 
 ```yaml
+#服务器
 service:
   port: 80
   name: "1239"
 
+#mysql
 mysql:
   username: "root"
   password: "admin123"
   database: "talk"
   url: "127.0.0.1"
 
+#redis
 redis:
   addr: ""
   db: 0
@@ -26,10 +29,39 @@ redis:
   minidleconns: 10
   connMaxIdleTime: 10
 
-
+#jwt
 jwt:
   time: 12
   key: "welcome to use Tally by Mr.Lei"
+  
+#日志相关配置
+Logs:
+  leave: "info"
+  prefix: "Tally"
+  path: "./log/"
+  maxsize: 100
+
+#oauth2验证库
+oauth2:
+  clientID: ""
+  clientSecret: ""
+  authURL: ""
+  tokenURL: ""
+  redirectURL: ""
+  scopes: ""
+
+#x星火大模型
+sparkDesk:
+  appid: ""
+  apiSecret: ""
+  apiKey: ""
+  hostUrl: "wss://spark-api.xf-yun.com/v3.1/chat"
+  
+#腾讯cos对象存储
+tencentCos:
+  Url: ""
+  secretId: ""
+  secretKey: ""
 
 
 
