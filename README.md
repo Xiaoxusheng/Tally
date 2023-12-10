@@ -1,9 +1,11 @@
 ## 使用 echo+gorm+redis实现
 
 ### 1 sql语句
+
 ![img.png](sql/img.png)
 
 ### 2 配置文件config,yaml,修改配置
+
 ```yaml
 service:
   port: 80
@@ -26,7 +28,7 @@ redis:
 
 
 jwt:
-  time: 12  
+  time: 12
   key: "welcome to use Tally by Mr.Lei"
 
 
@@ -34,14 +36,21 @@ jwt:
 ```
 
 ### 3 启动服务
+
 #### 1.下载依赖
+
 ```shell
 go mod tidy
 ```
+
 #### 2.运行
+
 ```shell
 go run main.go
 ```
+
+### 4 api文档
+[api接口文档](https://documenter.getpostman.com/view/26266864/2s9Ykhfint)
 
 
 

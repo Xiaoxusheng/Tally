@@ -18,7 +18,7 @@ func main() {
 	config.InitMysql()
 	//连接redis
 	config.InitRedis()
-
+	//异步写入数据库
 	go utils.Set()
 
 	e := echo.New()

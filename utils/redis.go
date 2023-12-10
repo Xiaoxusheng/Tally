@@ -45,7 +45,7 @@ func Get(t string) []string {
 		if t == global.Global.Redis.Type(global.Global.Ctx, list[i]).Val() {
 			valList = append(valList, list[i])
 		}
-		fmt.Println(global.Global.Redis.Type(global.Global.Ctx, list[i]).Val())
+		global.Global.Log.Info(global.Global.Redis.Type(global.Global.Ctx, list[i]).Val())
 	}
 	return valList
 }
