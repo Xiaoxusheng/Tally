@@ -10,10 +10,10 @@ import (
 )
 
 func main() {
-	//log初始化
-	config.InitLog()
 	//读取配置文件
 	config.InitService()
+	//log初始化
+	config.InitLog()
 	//连接mysql
 	config.InitMysql()
 	//连接redis

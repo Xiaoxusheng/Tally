@@ -18,7 +18,3 @@ type Tally struct {
 func (t *Tally) TableName() string {
 	return "tally_basic"
 }
-
-//func (t *Tally) MarshalBinary() ([]byte, error) {
-//	return json.Marshal(t)
-//}

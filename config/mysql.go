@@ -20,6 +20,7 @@ func InitMysql() {
 	global.Global.Mysql = db
 	//建表
 	//err = global.Global.Mysql.AutoMigrate(&models.Blog{})
+	//err = global.Global.Mysql.AutoMigrate(&models.Collect{})
 	//if err != nil {
 	//	global.Global.Log.Info(err)
 	//	return

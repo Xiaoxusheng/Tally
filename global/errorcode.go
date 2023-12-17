@@ -20,6 +20,7 @@ const (
 	TallyListKey    = "TallyList"
 	BlogLikesKey    = "blogLikes"
 	BlogSetLikesKey = "blogLikesSet"
+	BlogText        = "blogText"
 )
 
 const (

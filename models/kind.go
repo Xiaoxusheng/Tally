@@ -13,8 +13,3 @@ type Kind struct {
 func (k *Kind) TableName() string {
 	return "kind_basic"
 }
-
-//func (k *Kind) MarshalBinary() ([]byte, error) {
-//	// 在这里编写将 User 类型转换为字节切片的逻辑
-//	return json.Marshal(k)
-//}

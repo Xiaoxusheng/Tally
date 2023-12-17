@@ -11,7 +11,7 @@ type Blog struct {
 	ImgUrl       string `gorm:"type:varchar(1000) ; comment:'图片url,为空表示没有图片'" json:"imgUrl"`
 	Text         string `gorm:"type:varchar(2000); comment:'文本内容' " json:"text"`
 	Likes        int32  `gorm:"type:int ; comment:'点赞数量'" json:"likes"`
-	IsLike       bool
+	ViolateRule  bool   `gorm:"type:bool not null ; comment:'评论内容是否违规'"  json:"violateRule"`
 }
 
 func (b *Blog) TableName() string {
