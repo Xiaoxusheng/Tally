@@ -84,6 +84,11 @@ go run main.go
 ### 4 api文档
 [api接口文档](https://documenter.getpostman.com/view/26266864/2s9Ykhfint)
 
+### 5 命令
+```txt
+ du -h /root/tally  查看文件夹占用大小
+ go build -o talk -ldflags "-s  -w"  打包可执行文件
+```
 
 
 
