@@ -14,6 +14,7 @@ const (
 	LikesCode                   //点赞
 )
 
+// redis 使用前缀
 const (
 	ListKey         = "kind_list"
 	CollectKey      = "collect"
@@ -23,6 +24,7 @@ const (
 	BlogText        = "blogText"
 )
 
+// 错误信息
 const (
 	LoginErr        = "用户名或密码错误！"
 	UserIdentityErr = "获取用户错误！"
@@ -34,9 +36,11 @@ const (
 	BlogErr         = "新增博客失败！"
 	LikesErr        = "点赞失败！"
 	LikesAlreadyErr = "已经点赞！"
-	QueryErr        = "获取必要参数失败"
+
+	QueryErr = "获取必要参数失败"
 )
 
+// 日=日志颜色
 const (
 	Red    = 31
 	Yellow = 33
