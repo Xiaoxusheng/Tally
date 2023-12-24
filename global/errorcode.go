@@ -3,15 +3,15 @@ package global
 //自定义错误
 
 const (
-	UserCode = iota + 100011
-	TallyCode
-	VerifyCode
-	KindCode
-	SearchCode
-	CollectCode
-	FileCode
-	BlogCode
-	LikesCode
+	UserCode    = iota + 100011 //用户
+	TallyCode                   //账单
+	VerifyCode                  //验证失败
+	KindCode                    //种类
+	SearchCode                  //搜索
+	CollectCode                 //收藏
+	FileCode                    //文件
+	BlogCode                    //博客
+	LikesCode                   //点赞
 )
 
 const (
