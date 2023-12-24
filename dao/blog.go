@@ -13,11 +13,20 @@ func InsertBlog(blog *models.Blog) error {
 	return nil
 }
 
-func UpDateLikes(id string, n string) error {
+func UpdateLikes(id string, n string) error {
 	blog := new(models.Blog)
 	err := global.Global.Mysql.Model(blog).Where("identity=?", id).Update("likes", n).Error
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func GetIdByBlog(id string) string {
+	blog := new(models.Blog)
+	err := global.Global.Mysql.Where("Identity=?", id).Take(blog).Error
+	if err != nil {
+		return ""
+	}
+	return blog.UserIdentity
 }

@@ -11,7 +11,8 @@ const (
 	CollectCode                 //收藏
 	FileCode                    //文件
 	BlogCode                    //博客
-	LikesCode                   //点赞
+	LikesCode
+	Collect // 收藏博客
 )
 
 // redis 使用前缀
@@ -22,6 +23,8 @@ const (
 	BlogLikesKey    = "blogLikes"
 	BlogSetLikesKey = "blogLikesSet"
 	BlogText        = "blogText"
+	BlogCollects    = "blogCollect"
+	BlogCollectRem  = "blogCollectRem"
 )
 
 // 错误信息
@@ -36,8 +39,9 @@ const (
 	BlogErr         = "新增博客失败！"
 	LikesErr        = "点赞失败！"
 	LikesAlreadyErr = "已经点赞！"
-
-	QueryErr = "获取必要参数失败"
+	QueryErr        = "获取必要参数失败！"
+	BlogCollect     = "收藏失败！"
+	BlogNotFound    = "博客不存在！"
 )
 
 // 日=日志颜色

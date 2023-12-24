@@ -80,13 +80,24 @@ func BlogText(c echo.Context) error {
 		if err != nil {
 			return
 		}
-		//写进数据
-		global.Global.Redis.ZAdd(global.Global.Ctx, global.BlogText+blogId, redis.Z{
+		//写进sortSet
+		_, err = global.Global.Redis.ZAdd(global.Global.Ctx, global.BlogText, redis.Z{
 			Score:  float64(time.Now().Unix()),
 			Member: text,
-		})
+		}).Result()
+		if err != nil {
+			global.Global.Log.Warn(err)
+		}
+		//把博客id存入set
+		_, err = global.Global.Redis.SAdd(global.Global.Ctx, global.BlogText+":IdList", blogId).Result()
+		if err != nil {
+			global.Global.Log.Warn(err)
+		}
 		//点赞
-		global.Global.Redis.Set(global.Global.Ctx, global.BlogLikesKey+blogId, 0, 0)
+		_, err = global.Global.Redis.Set(global.Global.Ctx, global.BlogLikesKey+blogId, 0, 0).Result()
+		if err != nil {
+			global.Global.Log.Warn(err)
+		}
 	}()
 	return common.Ok(c, nil)
 }
@@ -100,6 +111,11 @@ func Likes(c echo.Context) error {
 	id := utils.GetIdentity(c, "identity")
 	if id == "" {
 		return common.Fail(c, global.LikesCode, global.UserIdentityErr)
+	}
+	//判断博客是否存在
+	value := global.Global.Redis.SIsMember(global.Global.Ctx, global.BlogText+":IdList", blogId).Val()
+	if !value {
+		return common.Fail(c, global.LikesCode, global.BlogNotFound)
 	}
 	//判断是否已经点赞
 	val := global.Global.Redis.SIsMember(global.Global.Ctx, global.BlogSetLikesKey+blogId, id).Val()
@@ -148,62 +164,82 @@ func IsLike(c echo.Context) error {
 
 // BlogList 博客列表
 func BlogList(c echo.Context) error {
-	blogId := c.QueryParam("blogId")
-	if blogId == "" {
-		return common.Fail(c, global.BlogCode, global.BlogErr)
-	}
 	id := utils.GetIdentity(c, "identity")
 	if id == "" {
 		return common.Fail(c, global.BlogCode, global.UserIdentityErr)
 	}
 	//判断是否取过数据
-	lens := 10
-	list := make([]*models.Blog, 0, lens)
+	list := make([]*models.Blog, 0, global.Count)
 	blogText := new(models.Blog)
-	val := global.Global.Redis.ZScore(global.Global.Ctx, global.BlogText+blogId+"user", id).Val()
-
+	val := global.Global.Redis.ZScore(global.Global.Ctx, global.BlogText+"user", id).Val()
+	var t1 float64 = 0
+	var count int64 = 1
+	//val
 	if val != 0 {
-		result, err := global.Global.Redis.ZRevRange(global.Global.Ctx, global.BlogText+blogId, int64(val)+1, int64(val+11)).Result()
-		if err != nil {
-			return err
-		}
-		//更新索引
-		_, err = global.Global.Redis.ZAdd(global.Global.Ctx, global.BlogText+blogId+"user", redis.Z{
-			Score:  val + 11,
-			Member: id,
+		t := time.Now()
+		d := time.Date(t.Year(), t.Month(), t.Day()-1, t.Hour(), t.Minute(), t.Second(), 0, t.Location())
+		//获取
+		result, err := global.Global.Redis.ZRevRangeByScoreWithScores(global.Global.Ctx, global.BlogText, &redis.ZRangeBy{
+			Min:    strconv.FormatInt(d.Unix(), 10),
+			Max:    strconv.FormatInt(t.Unix(), 10),
+			Offset: int64(val),
+			Count:  global.Count,
 		}).Result()
 		if err != nil {
 			return err
 		}
+
 		for i := 0; i < len(result); i++ {
-			err := json.Unmarshal([]byte(result[i]), blogText)
+			err := json.Unmarshal([]byte(result[i].Member.(string)), blogText)
 			if err != nil {
 				return err
 			}
-			if i == lens-1 {
-				break
+			if t1 == result[i].Score {
+				count++
+			} else {
+				t1 = result[i].Score
+				count = 1
 			}
 			list = append(list, blogText)
+		}
+		//存入有几条相同的数据
+		_, err = global.Global.Redis.ZAdd(global.Global.Ctx, global.BlogText+"user", redis.Z{
+			Score:  float64(count),
+			Member: id,
+		}).Result()
+		if err != nil {
+			return err
 		}
 		return common.Ok(c, list)
 	}
 	//获取一天范围内的前十条说说
 	t := time.Now()
 	d := time.Date(t.Year(), t.Month(), t.Day()-1, t.Hour(), t.Minute(), t.Second(), 0, t.Location())
-	res, err := global.Global.Redis.ZRevRangeByScore(global.Global.Ctx, global.BlogText+blogId, &redis.ZRangeBy{
-		Min: strconv.FormatInt(d.Unix(), 10),
-		Max: strconv.FormatInt(t.Unix(), 10),
+	res, err := global.Global.Redis.ZRevRangeByScoreWithScores(global.Global.Ctx, global.BlogText, &redis.ZRangeBy{
+		Min:    strconv.FormatInt(d.Unix(), 10),
+		Max:    strconv.FormatInt(t.Unix(), 10),
+		Offset: 0,
+		Count:  global.Count,
 	}).Result()
+
+	//第一次取
+	global.Global.Redis.ZAdd(global.Global.Ctx, global.BlogText+"user", redis.Z{
+		Score:  1,
+		Member: id,
+	})
 	if err != nil {
 		return err
 	}
 	for i := 0; i < len(res); i++ {
-		err := json.Unmarshal([]byte(res[i]), blogText)
+		err := json.Unmarshal([]byte(res[i].Member.(string)), blogText)
 		if err != nil {
 			return err
 		}
-		if i == lens-1 {
-			break
+		if t1 == res[i].Score {
+			count++
+		} else {
+			t1 = res[i].Score
+			count = 1
 		}
 		list = append(list, blogText)
 	}
@@ -212,6 +248,62 @@ func BlogList(c echo.Context) error {
 
 // CollectBlog 收藏博客
 func CollectBlog(c echo.Context) error {
-
+	blogId := c.QueryParam("blogId")
+	if blogId == "" {
+		return common.Fail(c, global.LikesCode, global.QueryErr)
+	}
+	id := utils.GetIdentity(c, "identity")
+	if id == "" {
+		return common.Fail(c, global.LikesCode, global.UserIdentityErr)
+	}
+	//判断博客id是否存在
+	val := global.Global.Redis.SIsMember(global.Global.Ctx, global.BlogText+":IdList", blogId).Val()
+	if !val {
+		return common.Fail(c, global.LikesCode, global.BlogNotFound)
+	}
+	//判断是否收藏
+	value := global.Global.Redis.SIsMember(global.Global.Ctx, global.BlogCollects+id, blogId).Val()
+	if value {
+		//在玩家的收藏列表中删除收藏
+		res, err := global.Global.Redis.SRem(global.Global.Ctx, global.BlogCollects+id, blogId).Result()
+		global.Global.Log.Info(res, err)
+		//添加进删除的
+		res, err = global.Global.Redis.SAdd(global.Global.Ctx, global.BlogCollectRem+id, blogId).Result()
+		global.Global.Log.Info(res, err)
+		if err != nil {
+			global.Global.Log.Warn(err)
+			return common.Fail(c, global.Collect, global.BlogCollect)
+		}
+		return common.Fail(c, global.Collect, global.BlogCollect)
+	}
+	//收藏博客的set,未收藏
+	_, err := global.Global.Redis.SAdd(global.Global.Ctx, global.BlogCollects+id, blogId).Result()
+	if err != nil {
+		global.Global.Log.Warn(err)
+		return common.Fail(c, global.Collect, global.BlogCollect)
+	}
+	res, err := global.Global.Redis.SRem(global.Global.Ctx, global.BlogCollectRem+id, blogId).Result()
+	global.Global.Log.Info(res, err)
+	if err != nil {
+		global.Global.Log.Warn(err)
+	}
+	if uid := dao.GetIdByBlog(blogId); uid != "" {
+		//	存进数据库
+		err := dao.InsertBlogCollect(&models.Collect{
+			Identity:     utils.GetUidV4(),
+			UserIdentity: id,
+			CollectId:    uid,
+			BlogId:       blogId,
+		})
+		if err != nil {
+			global.Global.Log.Warn(err)
+			//err = dao.UpdateBlogCollect(blogId)
+			//if err != nil {
+			//	global.Global.Log.Warn(err)
+			//	return err
+			//}
+			return common.Ok(c, "")
+		}
+	}
 	return common.Ok(c, nil)
 }

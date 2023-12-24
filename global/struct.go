@@ -5,3 +5,7 @@ type UrlList struct {
 	Url   string `json:"url,omitempty"`
 	Index int    `json:"index,omitempty"`
 }
+
+const (
+	Count = 15 //博客列表数量
+)
