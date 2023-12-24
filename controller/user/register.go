@@ -11,6 +11,10 @@ import (
 	"net/http"
 )
 
+/*
+注册模块
+*/
+
 type RegisterUser struct {
 	Username string `json:"username"  form:"username"  validate:"min=5,max=10"`
 	Password string `json:"password"  form:"password" validate:"min=5,max=10"`

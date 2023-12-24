@@ -7,6 +7,10 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+/*
+搜索模块
+*/
+
 type Searches struct {
 	Identity     string  `json:"identity"  query:"identity" form:"identity"  param:"identity"`
 	UserIdentity string  `json:"userIdentity" query:"userIdentity" form:"userIdentity" param:"userIdentity"`

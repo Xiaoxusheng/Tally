@@ -14,6 +14,10 @@ import (
 	"time"
 )
 
+/*
+用户模块
+*/
+
 type User struct {
 	Username string `json:"username"  form:"username"  validate:"min=5,max=10"`
 	Password string `json:"password"  form:"password" validate:"min=5,max=10"`

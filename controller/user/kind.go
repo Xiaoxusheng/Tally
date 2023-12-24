@@ -10,6 +10,10 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+/*
+分类模块
+*/
+
 type Kind struct {
 	Name         string `json:"name,omitempty" query:"name" form:"name" param:"name" validate:"required"`
 	SerialNumber int    `json:"serialNumber,omitempty" query:"serialNumber" form:"serialNumber" param:"serialNumber"  validate:"required"`

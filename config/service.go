@@ -9,13 +9,13 @@ import (
 	"time"
 )
 
-// 服务器
+// Service 服务器
 type Service struct {
 	Port int    `json:"port" yaml:"port"`
 	Name string `json:"name" yaml:"name"`
 }
 
-// 数据库
+// Mysql 数据库
 type Mysql struct {
 	Database string `json:"database" yaml:"database"`
 	Username string `json:"username" yaml:"username"`
@@ -23,7 +23,7 @@ type Mysql struct {
 	Url      string `json:"url" yaml:"url"`
 }
 
-// redis
+// Redis
 type Redis struct {
 	Addr            string        `json:"addr" yaml:"addr"`
 	Password        string        `json:"password" yaml:"password"`
@@ -34,17 +34,18 @@ type Redis struct {
 	ConnMaxIdleTime time.Duration `json:"connMaxIdleTime" yaml:"connMaxIdleTime"`
 }
 
-// Jwt
 type Jwt struct {
 	Key  string
 	Time time.Duration
 }
+
 type Logs struct {
 	Leave   string `json:"leave,omitempty" yaml:"leave"`
 	Prefix  string `json:"prefix,omitempty" yaml:"prefix"`
 	Path    string `json:"path,omitempty" yaml:"path"`
 	Maxsize int    `json:"maxsize,omitempty" yaml:"maxsize"`
 }
+
 type Oauth2 struct {
 	ClientID     string `json:"clientID,omitempty" yaml:"clientID"`
 	ClientSecret string `json:"clientSecret,omitempty" yaml:"clientSecret"`

@@ -11,7 +11,7 @@ import (
 
 // Set 这个脚本异步写入数据库
 func Set() {
-	t := time.NewTicker(time.Second * 10)
+	t := time.NewTicker(time.Minute * 10)
 	for {
 		list := Get("set")
 		select {
@@ -39,7 +39,6 @@ func Set() {
 					}
 					//收藏
 					if strings.Contains(list[i], global.BlogCollectRem) {
-						fmt.Println("收藏", list[i][len(global.BlogCollectRem):])
 						//拼接
 						val := global.Global.Redis.SMembers(global.Global.Ctx, list[i]).Val()
 						global.Global.Log.Info(val)
@@ -52,7 +51,6 @@ func Set() {
 						}
 					}
 					if strings.Contains(list[i], global.BlogCollects) {
-						fmt.Println("修改收藏", list[i][len(global.BlogCollects):])
 						//拼接
 						val := global.Global.Redis.SMembers(global.Global.Ctx, list[i]).Val()
 						global.Global.Log.Error(val)

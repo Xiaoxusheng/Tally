@@ -42,4 +42,6 @@ func Routers(e *echo.Echo) {
 	users.GET("/isLike", user.IsLike)
 	users.GET("/blog_list", user.BlogList)
 	users.GET("/blog_collect", user.CollectBlog)
+	users.POST("/Blog_comment", user.PushComment)
+
 }

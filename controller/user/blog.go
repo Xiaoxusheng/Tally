@@ -14,6 +14,10 @@ import (
 	"time"
 )
 
+/*
+博客模块
+*/
+
 type Blog struct {
 	BlogText string `form:"blogText"  validate:"required"`
 	Url      string `form:"url" validate:"required"`

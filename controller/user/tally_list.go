@@ -15,6 +15,10 @@ import (
 	"time"
 )
 
+/*
+账单模块
+*/
+
 type List struct {
 	Kind     int     `json:"kind" query:"kind" form:"kind"`
 	Money    float64 `json:"money" query:"money" form:"money"`

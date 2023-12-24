@@ -11,8 +11,9 @@ const (
 	CollectCode                 //收藏
 	FileCode                    //文件
 	BlogCode                    //博客
-	LikesCode
-	Collect // 收藏博客
+	LikesCode                   //点赞
+	Collect                     // 收藏博客
+	CommentCode
 )
 
 // redis 使用前缀

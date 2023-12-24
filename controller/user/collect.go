@@ -10,6 +10,8 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+/*收藏模块*/
+
 type Collect struct {
 	Identity string `json:"identity"  query:"identity" param:"identity"`
 }
