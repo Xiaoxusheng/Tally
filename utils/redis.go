@@ -11,7 +11,7 @@ import (
 
 // Set 这个脚本异步写入数据库
 func Set() {
-	t := time.NewTicker(time.Minute * 10)
+	t := time.NewTicker(time.Second * 10)
 	for {
 		list := Get("set")
 		select {
@@ -21,14 +21,49 @@ func Set() {
 				continue
 			}
 			go func() {
+
 				for i := 0; i < len(list); i++ {
+					//记录点赞
 					if strings.Contains(list[i], global.BlogSetLikesKey) {
-						fmt.Println(list[i][len("blogLikesSet"):])
-						val := global.Global.Redis.Get(global.Global.Ctx, global.BlogLikesKey+list[i][len("blogLikesSet"):]).Val()
-						err := dao.UpDateLikes(list[i][len(global.BlogSetLikesKey):], val)
+						fmt.Println(list[i][len("blogLikesSet"):], list[i])
+						val := global.Global.Redis.Get(global.Global.Ctx, global.BlogLikesKey+list[i][len(global.BlogSetLikesKey):]).Val()
+						fmt.Println("v", val)
+						if val == "" {
+							continue
+						}
+						err := dao.UpdateLikes(list[i][len(global.BlogSetLikesKey):], val)
 						if err != nil {
 							log.Println("插入出差", err)
 							return
+						}
+					}
+					//收藏
+					if strings.Contains(list[i], global.BlogCollectRem) {
+						fmt.Println("收藏", list[i][len(global.BlogCollectRem):])
+						//拼接
+						val := global.Global.Redis.SMembers(global.Global.Ctx, list[i]).Val()
+						global.Global.Log.Info(val)
+						for j := 0; j < len(val); j++ {
+							err := dao.DeleteBlogCollect(val[j])
+							if err != nil {
+								log.Println("删除出错", err)
+								return
+							}
+						}
+					}
+					if strings.Contains(list[i], global.BlogCollects) {
+						fmt.Println("修改收藏", list[i][len(global.BlogCollects):])
+						//拼接
+						val := global.Global.Redis.SMembers(global.Global.Ctx, list[i]).Val()
+						global.Global.Log.Error(val)
+
+						global.Global.Log.Info(val)
+						for j := 0; j < len(val); j++ {
+							err := dao.UpdateBlogCollect(val[j])
+							if err != nil {
+								log.Println("更新出错", err)
+								return
+							}
 						}
 					}
 				}
