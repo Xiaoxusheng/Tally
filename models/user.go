@@ -11,6 +11,7 @@ type User struct {
 	Phone    string `gorm:"type:varchar(11) not null unique" json:"phone,omitempty"`
 	Identity string `gorm:"type:varchar(36) not null unique" json:"identity,omitempty"`
 	GithubId string `gorm:"type:varchar(36) not null unique" json:"githubId,omitempty"`
+	IsHide   bool   `gorm:"type:int ; comment:'是否隐私账号'" json:"isHide"`
 	IP       string `gorm:"type:varchar(64) not null" json:"IP,omitempty"`
 }
 

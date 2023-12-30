@@ -311,3 +311,14 @@ func CollectBlog(c echo.Context) error {
 	}
 	return common.Ok(c, nil)
 }
+
+//浏览历史
+
+//修改博客的状态
+
+// DeleteBlog 删除博客
+func DeleteBlog(c echo.Context) error {
+	return common.Ok(c, nil)
+}
+
+//

@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/oauth2"
+	"net/http"
 	"time"
 )
 
@@ -18,11 +19,55 @@ import (
 用户模块
 */
 
+type RegisterUser struct {
+	Username string `json:"username"  form:"username"  validate:"min=5,max=10"`
+	Password string `json:"password"  form:"password" validate:"min=5,max=10"`
+	Phone    string `json:"phone" form:"phone" validate:"required,phone"`
+}
+
 type User struct {
 	Username string `json:"username"  form:"username"  validate:"min=5,max=10"`
 	Password string `json:"password"  form:"password" validate:"min=5,max=10"`
 }
 
+// Register 注册
+func Register(c echo.Context) error {
+	user := new(RegisterUser)
+	err := c.Bind(user)
+	if err != nil {
+		return common.Fail(c, global.UserCode, global.ParseErr)
+	}
+	err = c.Validate(user)
+	if err != nil {
+		return err
+	}
+	//注册
+	if ok := dao.GetPhone(user.Phone); ok {
+		return common.Fail(c, global.UserCode, "电话号码已经存在！")
+	}
+	//
+	if ok := dao.GetUserByUsername(user.Username); ok {
+		return common.Fail(c, http.StatusOK, "用户名已经存在！")
+	}
+	id := utils.GetUidV5(user.Username)
+	err = dao.InsertUser(&models.User{
+		Username: user.Username,
+		Phone:    user.Phone,
+		Password: utils.Md5(user.Password),
+		IP:       c.RealIP(),
+		Identity: id,
+	})
+	if err != nil {
+		fmt.Println(err)
+		return common.Fail(c, global.UserCode, "注册失败！")
+	}
+	go func() {
+		global.Global.Redis.HSet(global.Global.Ctx, user.Username, user.Password, id)
+	}()
+	return common.Ok(c, nil)
+}
+
+// Login 登录
 func Login(c echo.Context) error {
 	user := new(User)
 	err := c.Bind(user)
@@ -70,6 +115,7 @@ func Login(c echo.Context) error {
 
 }
 
+// Logout 登出
 func Logout(c echo.Context) error {
 	identity := utils.GetIdentity(c, "identity")
 	if identity == "" {
@@ -83,6 +129,7 @@ func Logout(c echo.Context) error {
 	return common.Ok(c, nil)
 }
 
+// Info 获取用户信息
 func Info(c echo.Context) error {
 	identity := utils.GetIdentity(c, "identity")
 	if identity == "" {
@@ -110,6 +157,7 @@ func Info(c echo.Context) error {
 	}
 }
 
+// ChangePwd 修改密码
 func ChangePwd(c echo.Context) error {
 	id := utils.GetIdentity(c, "identity")
 	if id == "" {
@@ -179,4 +227,22 @@ func Token(c echo.Context) error {
 	//	return err
 	//}
 
+}
+
+// FollowUser 关注用户
+func FollowUser(c echo.Context) error {
+	//用户id
+
+	//判断是否存在
+
+	//关注
+
+	//	加入关注列表
+
+	return common.Ok(c, nil)
+}
+
+// UpdateUserInfo 修改用户信息
+func UpdateUserInfo(c echo.Context) error {
+	return common.Ok(c, nil)
 }
