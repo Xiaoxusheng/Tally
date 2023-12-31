@@ -53,6 +53,7 @@ const (
 	QueryErr         = "获取必要参数失败！"
 	BlogCollect      = "收藏失败！"
 	BlogNotFound     = "博客不存在！"
+	DeleteBlogFail   = "删除博客失败！"
 )
 
 // 日=日志颜色

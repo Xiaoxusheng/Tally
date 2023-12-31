@@ -52,10 +52,13 @@ func Register(c echo.Context) error {
 	id := utils.GetUidV5(user.Username)
 	err = dao.InsertUser(&models.User{
 		Username: user.Username,
-		Phone:    user.Phone,
 		Password: utils.Md5(user.Password),
-		IP:       c.RealIP(),
+		Phone:    user.Phone,
 		Identity: id,
+		GithubId: "1",
+		Status:   0,
+		IsHide:   false,
+		IP:       c.RealIP(),
 	})
 	if err != nil {
 		fmt.Println(err)

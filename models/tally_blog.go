@@ -8,7 +8,7 @@ import (
 type Blog struct {
 	gorm.Model
 	Identity     string `gorm:"type:varchar(36) not null unique; comment:'唯一标识'" json:"identity" `
-	UserIdentity string `gorm:"type:varchar(36) not null unique; comment:'用户唯一标识'"  json:"userIdentity"`
+	UserIdentity string `gorm:"type:varchar(36) not null; comment:'用户唯一标识'"  json:"userIdentity"`
 	ImgUrl       string `gorm:"type:varchar(1000) ; comment:'图片url,为空表示没有图片'" json:"imgUrl"`
 	Text         string `gorm:"type:varchar(2000); comment:'文本内容' " json:"text"`
 	IsHide       bool   `gorm:"type:int ; comment:'文章是否私密'" json:"isHide"`

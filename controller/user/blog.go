@@ -72,11 +72,15 @@ func BlogText(c echo.Context) error {
 		UserIdentity: id,
 		ImgUrl:       blog.Url,
 		Text:         blog.BlogText,
+		IsHide:       false,
 		Likes:        0,
+		IP:           c.RealIP(),
+		ViolateRule:  false,
 	}
 	//写进数据库
 	err = dao.InsertBlog(blogs)
 	if err != nil {
+		global.Global.Log.Warn(err)
 		return common.Fail(c, global.BlogCode, global.BlogErr)
 	}
 	go func() {
@@ -92,6 +96,11 @@ func BlogText(c echo.Context) error {
 		if err != nil {
 			global.Global.Log.Warn(err)
 		}
+		result, err := global.Global.Redis.ZRange(global.Global.Ctx, global.BlogText, 0, time.Now().Unix()).Result()
+		if err != nil {
+			return
+		}
+		fmt.Println(result)
 		//把博客id存入set
 		_, err = global.Global.Redis.SAdd(global.Global.Ctx, global.BlogText+":IdList", blogId).Result()
 		if err != nil {
@@ -173,28 +182,41 @@ func BlogList(c echo.Context) error {
 		return common.Fail(c, global.BlogCode, global.UserIdentityErr)
 	}
 	//判断是否取过数据
-	list := make([]*models.Blog, 0, global.Count)
+	list := make([]models.Blog, 0, global.Count)
 	blogText := new(models.Blog)
 	val := global.Global.Redis.ZScore(global.Global.Ctx, global.BlogText+"user", id).Val()
 	var t1 float64 = 0
 	var count int64 = 1
+	fmt.Println("val", val)
 	//val
-	if val != 0 {
+	if val != global.Fail {
 		t := time.Now()
 		d := time.Date(t.Year(), t.Month(), t.Day()-1, t.Hour(), t.Minute(), t.Second(), 0, t.Location())
 		//获取
+		l := len(global.Global.Redis.ZRangeByScore(global.Global.Ctx, global.BlogText, &redis.ZRangeBy{
+			Min:    strconv.FormatInt(d.Unix(), 10),
+			Max:    strconv.FormatInt(t.Unix(), 10),
+			Offset: 0,
+			Count:  global.Count,
+		}).Val())
+		if l <= global.Collect {
+			fmt.Println("l", l)
+			val = 0
+		}
 		result, err := global.Global.Redis.ZRevRangeByScoreWithScores(global.Global.Ctx, global.BlogText, &redis.ZRangeBy{
 			Min:    strconv.FormatInt(d.Unix(), 10),
 			Max:    strconv.FormatInt(t.Unix(), 10),
-			Offset: int64(val),
+			Offset: int64(0),
 			Count:  global.Count,
 		}).Result()
+
+		fmt.Println("res", result)
 		if err != nil {
 			return err
 		}
-
+		global.Global.Log.Warn("len", len(result))
 		for i := 0; i < len(result); i++ {
-			err := json.Unmarshal([]byte(result[i].Member.(string)), blogText)
+			err = json.Unmarshal([]byte(result[i].Member.(string)), blogText)
 			if err != nil {
 				return err
 			}
@@ -204,8 +226,9 @@ func BlogList(c echo.Context) error {
 				t1 = result[i].Score
 				count = 1
 			}
-			list = append(list, blogText)
+			list = append(list, *blogText)
 		}
+		fmt.Println("list", list)
 		//存入有几条相同的数据
 		_, err = global.Global.Redis.ZAdd(global.Global.Ctx, global.BlogText+"user", redis.Z{
 			Score:  float64(count),
@@ -225,15 +248,13 @@ func BlogList(c echo.Context) error {
 		Offset: 0,
 		Count:  global.Count,
 	}).Result()
-
+	fmt.Println(res)
 	//第一次取
-	global.Global.Redis.ZAdd(global.Global.Ctx, global.BlogText+"user", redis.Z{
-		Score:  1,
-		Member: id,
-	})
+
 	if err != nil {
 		return err
 	}
+
 	for i := 0; i < len(res); i++ {
 		err := json.Unmarshal([]byte(res[i].Member.(string)), blogText)
 		if err != nil {
@@ -245,8 +266,15 @@ func BlogList(c echo.Context) error {
 			t1 = res[i].Score
 			count = 1
 		}
-		list = append(list, blogText)
+		list = append(list, *blogText)
 	}
+	if len(list) == 0 {
+		count = 0
+	}
+	global.Global.Redis.ZAdd(global.Global.Ctx, global.BlogText+"user", redis.Z{
+		Score:  float64(count),
+		Member: id,
+	})
 	return common.Ok(c, list)
 }
 
@@ -290,6 +318,7 @@ func CollectBlog(c echo.Context) error {
 	global.Global.Log.Info(res, err)
 	if err != nil {
 		global.Global.Log.Warn(err)
+		return common.Fail(c, global.Collect, global.BlogCollect)
 	}
 	if uid := dao.GetIdByBlog(blogId); uid != "" {
 		//	存进数据库
@@ -316,8 +345,24 @@ func CollectBlog(c echo.Context) error {
 
 //修改博客的状态
 
+//博客详情
+
 // DeleteBlog 删除博客
 func DeleteBlog(c echo.Context) error {
+	//博客id
+	blogId := c.QueryParam("blog_id")
+	if blogId == "" {
+		return common.Fail(c, global.BlogCode, global.QueryErr)
+	}
+	//判断博客是否存在
+	value := global.Global.Redis.SIsMember(global.Global.Ctx, global.BlogText+":IdList", blogId).Val()
+	if !value {
+		return common.Fail(c, global.BlogCode, global.BlogNotFound)
+	}
+	//删除
+	if global.Global.Redis.SRem(global.Global.Ctx, global.BlogText+":IdList", blogId).Val() == global.Fail {
+		return common.Fail(c, global.BlogCode, global.DeleteBlogFail)
+	}
 	return common.Ok(c, nil)
 }
 

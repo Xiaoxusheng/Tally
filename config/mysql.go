@@ -32,13 +32,20 @@ func InitMysql() {
 	global.Global.Log.Info("mysql初始化成功")
 	global.Global.Mysql = db
 	//建表
+	//err = global.Global.Mysql.AutoMigrate(&models.User{})
 	//err = global.Global.Mysql.AutoMigrate(&models.Blog{})
+	//err = global.Global.Mysql.AutoMigrate(&models.Comment{})
+	//err = global.Global.Mysql.AutoMigrate(&models.Collect{})
 	//err = global.Global.Mysql.AutoMigrate(&models.Collect{})
 	//if err != nil {
 	//	global.Global.Log.Info(err)
 	//	return
 	//}
-	//global.Global.Mysql.AutoMigrate(&models.Comment{})
+	//err = global.Global.Mysql.AutoMigrate(&models.Comment{})
+	//if err != nil {
+	//	fmt.Println(err)
+	//	return
+	//}
 	//f := sync.Once{}
 	//f.Do(
 	//	func() {

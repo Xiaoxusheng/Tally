@@ -41,10 +41,11 @@ func Routers(e *echo.Echo) {
 	users.GET("/analysis", user.Analysis)
 	users.POST("/upload", user.Upload)
 	users.POST("/blog_text", user.BlogText)
+	users.GET("/blog_del", user.DeleteBlog)
 	users.GET("/likes", user.Likes)
 	users.GET("/isLike", user.IsLike)
 	users.GET("/blog_list", user.BlogList)
 	users.GET("/blog_collect", user.CollectBlog)
-	users.POST("/Blog_comment", user.PushComment)
+	users.POST("/blog_comment", user.PushComment)
 
 }
