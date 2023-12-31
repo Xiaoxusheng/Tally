@@ -2,6 +2,7 @@ package models
 
 import "gorm.io/gorm"
 
+// Comment 评论
 type Comment struct {
 	gorm.Model
 	Identity     string `gorm:"type:varchar(36) not null unique; comment:'唯一标识'" json:"identity" `

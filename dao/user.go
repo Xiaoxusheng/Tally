@@ -67,3 +67,8 @@ func GetUserByUsername(username string) bool {
 	}
 	return true
 }
+
+func DeleteUser(id string) error {
+	user := new(models.User)
+	return global.Global.Mysql.Where("identity=?", id).Delete(user).Error
+}

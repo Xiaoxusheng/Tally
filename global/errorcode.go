@@ -18,6 +18,8 @@ const (
 
 // redis 使用前缀
 const (
+	UserFollow      = "follow"
+	BanUser         = "ban_user"
 	ListKey         = "kind_list"
 	CollectKey      = "collect"
 	TallyListKey    = "TallyList"
@@ -30,19 +32,27 @@ const (
 
 // 错误信息
 const (
-	LoginErr        = "用户名或密码错误！"
-	UserIdentityErr = "获取用户错误！"
-	ParseErr        = "解析失败！"
-	CollectErr      = "账单不存在！"
-	CollectToErr    = "收藏失败！"
-	MarshalErr      = "序列化失败！"
-	FileErr         = "文件上传错误！"
-	BlogErr         = "新增博客失败！"
-	LikesErr        = "点赞失败！"
-	LikesAlreadyErr = "已经点赞！"
-	QueryErr        = "获取必要参数失败！"
-	BlogCollect     = "收藏失败！"
-	BlogNotFound    = "博客不存在！"
+	UserNotFound     = "用户不存在！"
+	BannedUser       = "用户被封禁！"
+	LoginErr         = "用户名或密码错误！"
+	PassISNull       = "密码不能为空！"
+	PasswordIeErr    = "密码错误！"
+	ChangePassword   = "修改密码失败！"
+	UserIdentityErr  = "获取用户错误！"
+	AlreadyFollow    = "已经关注！"
+	FollowFail       = "关注失败！"
+	CancelFollowFail = "取消关注失败！"
+	ParseErr         = "解析失败！"
+	CollectErr       = "账单不存在！"
+	CollectToErr     = "收藏失败！"
+	MarshalErr       = "序列化失败！"
+	FileErr          = "文件上传错误！"
+	BlogErr          = "新增博客失败！"
+	LikesErr         = "点赞失败！"
+	LikesAlreadyErr  = "已经点赞！"
+	QueryErr         = "获取必要参数失败！"
+	BlogCollect      = "收藏失败！"
+	BlogNotFound     = "博客不存在！"
 )
 
 // 日=日志颜色
@@ -51,4 +61,10 @@ const (
 	Yellow = 33
 	Blue   = 36
 	Gray   = 39
+)
+
+// 常量
+const (
+	Success = 1
+	Fail    = 0
 )

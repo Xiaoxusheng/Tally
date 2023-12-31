@@ -4,6 +4,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// Blog 博客
 type Blog struct {
 	gorm.Model
 	Identity     string `gorm:"type:varchar(36) not null unique; comment:'唯一标识'" json:"identity" `
@@ -12,6 +13,7 @@ type Blog struct {
 	Text         string `gorm:"type:varchar(2000); comment:'文本内容' " json:"text"`
 	IsHide       bool   `gorm:"type:int ; comment:'文章是否私密'" json:"isHide"`
 	Likes        int32  `gorm:"type:int ; comment:'点赞数量'" json:"likes"`
+	IP           string `gorm:"type:varchar(64) not null ; comment:'IP地址'" json:"IP,omitempty"`
 	ViolateRule  bool   `gorm:"type:bool not null ; comment:'评论内容是否违规'"  json:"violateRule"`
 }
 

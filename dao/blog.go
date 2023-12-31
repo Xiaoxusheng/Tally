@@ -30,3 +30,8 @@ func GetIdByBlog(id string) string {
 	}
 	return blog.UserIdentity
 }
+
+func DeleteBlogByUserIdentity(UserId string) error {
+	blog := new(models.Blog)
+	return global.Global.Mysql.Where("user_identity=?", UserId).Delete(blog).Error
+}

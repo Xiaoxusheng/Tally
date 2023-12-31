@@ -38,6 +38,7 @@ func ParseToken() echo.MiddlewareFunc {
 			}
 
 			c.Set("identity", claims.Identity)
+			fmt.Println("id", claims.Identity)
 
 			switch {
 			case token.Valid:

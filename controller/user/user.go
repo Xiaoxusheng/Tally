@@ -67,6 +67,49 @@ func Register(c echo.Context) error {
 	return common.Ok(c, nil)
 }
 
+// SignOut 注销
+func SignOut(c echo.Context) error {
+	identity := utils.GetIdentity(c, "identity")
+	if identity == "" {
+		return common.Fail(c, global.UserCode, global.UserIdentityErr)
+	}
+	err := dao.DeleteUser(identity)
+	if err != nil {
+		return common.Fail(c, global.UserCode, global.UserIdentityErr)
+	}
+	//删除数据
+	go func() {
+		/*
+			删除redis
+		*/
+		//删除关注
+		global.Global.Redis.Del(global.Global.Ctx, global.UserFollow+identity)
+		//删除个人信息
+		global.Global.Redis.Get(global.Global.Ctx, identity+"info")
+		//删除token
+		global.Global.Redis.Del(global.Global.Ctx, identity)
+
+		/*
+			删除mysql数据
+		*/
+
+		err = dao.DeleteTally(identity)
+		if err != nil {
+			global.Global.Log.Warn(err)
+		}
+		err = dao.DeleteBlogCollect(identity)
+		if err != nil {
+			global.Global.Log.Warn(err)
+		}
+		err = dao.DeleteBlogCollectByUserIdentity(identity)
+		if err != nil {
+			global.Global.Log.Warn(err)
+		}
+
+	}()
+	return common.Ok(c, nil)
+}
+
 // Login 登录
 func Login(c echo.Context) error {
 	user := new(User)
@@ -161,20 +204,22 @@ func Info(c echo.Context) error {
 func ChangePwd(c echo.Context) error {
 	id := utils.GetIdentity(c, "identity")
 	if id == "" {
-		return common.Fail(c, global.UserCode, "获取失败")
+		global.Global.Log.Warn("identity is null")
+		return common.Fail(c, global.UserCode, global.QueryErr)
 	}
 	OldPwd := c.QueryParam("oldpwd")
 	pwd := c.QueryParam("pwd")
 	if pwd == "" {
-		return common.Fail(c, global.UserCode, "密码不能为空")
+		global.Global.Log.Warn("pwd is null")
+		return common.Fail(c, global.UserCode, global.PassISNull)
 	}
 	ok := dao.GetByPwdIdentity(id, utils.Md5(OldPwd))
 	if ok == nil {
-		return common.Fail(c, global.UserCode, "密码错误")
+		return common.Fail(c, global.UserCode, global.PasswordIeErr)
 	}
 	err := dao.UpdatePwd(id, utils.Md5(pwd))
 	if err != nil {
-		return common.Fail(c, global.UserCode, "密码修改失败")
+		return common.Fail(c, global.UserCode, global.ChangePassword)
 	}
 	//删除redis中存放的信息
 	go func() {
@@ -227,19 +272,6 @@ func Token(c echo.Context) error {
 	//	return err
 	//}
 
-}
-
-// FollowUser 关注用户
-func FollowUser(c echo.Context) error {
-	//用户id
-
-	//判断是否存在
-
-	//关注
-
-	//	加入关注列表
-
-	return common.Ok(c, nil)
 }
 
 // UpdateUserInfo 修改用户信息

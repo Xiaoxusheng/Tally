@@ -4,6 +4,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// Tally 账单
 type Tally struct {
 	gorm.Model
 	Identity     string  `gorm:"type:varchar(36) not null unique; comment:'唯一标识'" json:"identity" `

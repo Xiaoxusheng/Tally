@@ -20,3 +20,8 @@ func UpdateBlogCollect(blogId string) error {
 	global.Global.Log.Info("修改")
 	return global.Global.Mysql.Model(collect).Unscoped().Where("blog_id=?", blogId).Update("deleted_at", nil).Error
 }
+
+func DeleteBlogCollectByUserIdentity(id string) error {
+	collect := new(models.Collect)
+	return global.Global.Mysql.Where("user_identity=?", id).Delete(collect).Error
+}

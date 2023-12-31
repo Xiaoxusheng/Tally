@@ -101,3 +101,8 @@ func GetCollectList(id string) []*models.Tally {
 	}
 	return list
 }
+
+func DeleteTally(id string) error {
+	list := new(models.Tally)
+	return global.Global.Mysql.Where("identity=?", id).Delete(list).Error
+}

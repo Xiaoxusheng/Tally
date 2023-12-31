@@ -4,6 +4,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// Kind 种类
 type Kind struct {
 	gorm.Model
 	Name         string `gorm:"type:varchar(255);not null;unique;common:分类名称" json:"name,omitempty"`
