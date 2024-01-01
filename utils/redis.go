@@ -3,6 +3,7 @@ package utils
 import (
 	"Tally/dao"
 	"Tally/global"
+	"Tally/models"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"strings"
@@ -11,7 +12,12 @@ import (
 
 // Set 这个脚本异步写入数据库
 func Set() {
-	t := time.NewTicker(time.Minute * 10)
+	t := time.NewTicker(time.Minute * 5)
+	defer func() {
+		if err := recover(); err != nil {
+			global.Global.Log.Warn("goroutine 出错", err)
+		}
+	}()
 	for {
 		list := Get("set")
 		select {
@@ -21,7 +27,7 @@ func Set() {
 				continue
 			}
 			go func() {
-
+				global.Global.Log.Info("goroutine is star")
 				for i := 0; i < len(list); i++ {
 					//记录点赞
 					if strings.Contains(list[i], global.BlogSetLikesKey) {
@@ -33,7 +39,7 @@ func Set() {
 						}
 						err := dao.UpdateLikes(list[i][len(global.BlogSetLikesKey):], val)
 						if err != nil {
-							log.Println("插入出差", err)
+							global.Global.Log.Warn("插入出差", err)
 							return
 						}
 					}
@@ -64,7 +70,37 @@ func Set() {
 							}
 						}
 					}
+					//	关注
+					if strings.Contains(list[i], global.UserFollow) {
+						global.Global.Log.Info("进入follow")
+						if list[i] == global.UserFollow {
+							continue
+						}
+						id := list[i][len(global.UserFollow):]
+						//获取值
+						val := global.Global.Redis.SMembers(global.Global.Ctx, list[i]).Val()
+						global.Global.Log.Error(val)
+						//写入数据库
+						global.Global.Log.Info(val, id, val[0], len(val))
+						for i := 0; i < len(val); i++ {
+							if global.Global.Redis.SIsMember(global.Global.Ctx, "key"+id, val[i]).Val() {
+								global.Global.Log.Info("已经写入过")
+								continue
+							}
+							err := dao.InsertFollow(&models.Follow{
+								Identity: GetUidV4(),
+								UserId:   id,
+								FollowId: val[i],
+							})
+							if err != nil {
+								global.Global.Log.Error(err)
+								continue
+							}
+							global.Global.Redis.SAdd(global.Global.Ctx, "key"+id, val[i])
+						}
+					}
 				}
+
 			}()
 		}
 	}

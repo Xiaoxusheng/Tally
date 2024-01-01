@@ -55,7 +55,6 @@ func Register(c echo.Context) error {
 		Password: utils.Md5(user.Password),
 		Phone:    user.Phone,
 		Identity: id,
-		GithubId: "1",
 		Status:   0,
 		IsHide:   false,
 		IP:       c.RealIP(),
