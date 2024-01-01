@@ -97,17 +97,21 @@ func GetFollowList(c echo.Context) error {
 	//获取关注用户的长度
 	list := global.Global.Redis.SMembers(global.Global.Ctx, global.UserFollow+id).Val()
 	global.Global.Log.Warn(list)
-	followList := make([]*models.User, 0, len(list))
-	for i := 0; i < len(list); i++ {
-		val := global.Global.Redis.Get(global.Global.Ctx, list[i]+"info").Val()
-		if val != "" {
-			user := new(models.User)
-			err := json.Unmarshal([]byte(val), user)
-			if err != nil {
-				return err
+	if len(list) > 0 {
+		followList := make([]*models.User, 0, len(list))
+		for i := 0; i < len(list); i++ {
+			val := global.Global.Redis.Get(global.Global.Ctx, list[i]+"info").Val()
+			if val != "" {
+				user := new(models.User)
+				err := json.Unmarshal([]byte(val), user)
+				if err != nil {
+					return err
+				}
+				followList = append(followList, user)
 			}
-			followList = append(followList, user)
 		}
+		return common.Ok(c, followList)
 	}
+	followList := dao.GetFollowList(id)
 	return common.Ok(c, followList)
 }

@@ -3,7 +3,6 @@ package dao
 import (
 	"Tally/global"
 	"Tally/models"
-	"fmt"
 )
 
 func GetUserById(username, password string) *models.User {
@@ -54,7 +53,7 @@ func GetPhone(phone string) bool {
 }
 
 func InsertUser(user *models.User) error {
-	err := global.Global.Mysql.Create(user).Error
+	err := global.Global.Mysql.Omit("github_id").Create(user).Error
 	return err
 }
 
@@ -62,7 +61,7 @@ func GetUserByUsername(username string) bool {
 	user := new(models.User)
 	err := global.Global.Mysql.Where("username=?", username).Take(user).Error
 	if err != nil {
-		fmt.Println("sql查询错误" + err.Error())
+		global.Global.Log.Warn("sql查询错误" + err.Error())
 		return false
 	}
 	return true
