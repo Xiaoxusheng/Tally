@@ -27,6 +27,7 @@ func Routers(e *echo.Echo) {
 	users.GET("/sign_out", user.SignOut)
 	users.GET("/follow", user.FollowUser)
 	users.GET("/cancel_follow", user.CancelFollow)
+	users.GET("/get_follow_list", user.GetFollowList)
 	users.GET("/logout", user.Logout)
 	users.POST("/add", user.AddTallyLog)
 	users.GET("/allot_kind", user.AllotKind)

@@ -4,7 +4,9 @@ import (
 	"Tally/common"
 	"Tally/dao"
 	"Tally/global"
+	"Tally/models"
 	"Tally/utils"
+	"encoding/json"
 	"github.com/labstack/echo/v4"
 )
 
@@ -87,6 +89,25 @@ func CancelFollow(c echo.Context) error {
 
 // GetFollowList 关注列表
 func GetFollowList(c echo.Context) error {
-
-	return common.Ok(c, nil)
+	//用户id
+	id := utils.GetIdentity(c, "identity")
+	if id == "" {
+		return common.Fail(c, global.UserCode, global.QueryErr)
+	}
+	//获取关注用户的长度
+	list := global.Global.Redis.SMembers(global.Global.Ctx, global.UserFollow+id).Val()
+	global.Global.Log.Warn(list)
+	followList := make([]*models.User, 0, len(list))
+	for i := 0; i < len(list); i++ {
+		val := global.Global.Redis.Get(global.Global.Ctx, list[i]+"info").Val()
+		if val != "" {
+			user := new(models.User)
+			err := json.Unmarshal([]byte(val), user)
+			if err != nil {
+				return err
+			}
+			followList = append(followList, user)
+		}
+	}
+	return common.Ok(c, followList)
 }

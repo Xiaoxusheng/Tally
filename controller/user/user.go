@@ -60,7 +60,7 @@ func Register(c echo.Context) error {
 		IP:       c.RealIP(),
 	})
 	if err != nil {
-		fmt.Println(err)
+		global.Global.Log.Warn(err)
 		return common.Fail(c, global.UserCode, "注册失败！")
 	}
 	go func() {
@@ -195,7 +195,12 @@ func Info(c echo.Context) error {
 			return common.Fail(c, global.UserCode, "获取个人信息失败")
 		}
 		go func() {
-			val, err := global.Global.Redis.Set(global.Global.Ctx, identity+"info", info, 0).Result()
+			marshal, err := json.Marshal(info)
+			if err != nil {
+				global.Global.Log.Warn(err)
+				return
+			}
+			val, err := global.Global.Redis.Set(global.Global.Ctx, identity+"info", marshal, 0).Result()
 			fmt.Println(val, err)
 		}()
 		return common.Ok(c, info)
