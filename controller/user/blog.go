@@ -89,7 +89,7 @@ func BlogText(c echo.Context) error {
 		global.Global.Log.Warn(err)
 		return common.Fail(c, global.BlogCode, global.BlogErr)
 	}
-	go func() {
+	global.Global.Pool.Submit(func() {
 		text, err := json.Marshal(blogs)
 		if err != nil {
 			return
@@ -117,7 +117,7 @@ func BlogText(c echo.Context) error {
 		if err != nil {
 			global.Global.Log.Warn(err)
 		}
-	}()
+	})
 	return common.Ok(c, nil)
 }
 

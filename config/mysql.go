@@ -27,7 +27,8 @@ func InitMysql() {
 			)
 			dsn := Config.Mysql.Username + ":" + Config.Mysql.Password + "@tcp(" + Config.Mysql.Url + ")/" + Config.Mysql.Database + "?charset=utf8mb4&parseTime=True&loc=Local"
 			db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
-				Logger: newLogger,
+				Logger:      newLogger,
+				PrepareStmt: true,
 			})
 			if err != nil {
 				panic(err)

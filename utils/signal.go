@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"Tally/global"
 	"fmt"
 	"os"
 	"os/signal"
@@ -19,6 +20,21 @@ func Listen() {
 		select {
 		case sig := <-signalCh:
 			fmt.Printf("Received signal: %s\n", sig)
+			//关闭协程池
+			global.Global.Pool.StopWait()
+			//关闭连接
+			db, err := global.Global.Mysql.DB()
+			if err != nil {
+				return
+			}
+			err = db.Close()
+			if err != nil {
+				global.Global.Log.Warn("mysql close err:", err)
+			}
+			err = global.Global.Redis.Close()
+			if err != nil {
+				global.Global.Log.Warn("redis close err:", err)
+			}
 			os.Exit(0)
 		}
 

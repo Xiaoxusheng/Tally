@@ -15,7 +15,7 @@ func InitPool() {
 	once.Do(
 		func() {
 			global.Global.Pool = workerpool.New(Config.Pool.Num)
-			global.Global.Pool.StopWait()
+			//global.Global.Pool.StopWait()
 		},
 	)
 }
