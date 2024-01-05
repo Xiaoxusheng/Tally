@@ -22,6 +22,12 @@ type Blog struct {
 	BlogText string `form:"blogText"  validate:"required"`
 	Url      string `form:"url" validate:"required"`
 }
+
+type UpdateStatus struct {
+	BlogId string `json:"blogId,omitempty" form:"blogId" query:"blogId" param:"blogId"`
+	Status int    `json:"status,omitempty" form:"status" query:"status" param:"status"`
+}
+
 type Collects struct {
 }
 
@@ -322,7 +328,7 @@ func CollectBlog(c echo.Context) error {
 	}
 	if uid := dao.GetIdByBlog(blogId); uid != "" {
 		//	存进数据库
-		err := dao.InsertBlogCollect(&models.Collect{
+		err = dao.InsertBlogCollect(&models.Collect{
 			Identity:     utils.GetUidV4(),
 			UserIdentity: id,
 			CollectId:    uid,
@@ -330,20 +336,43 @@ func CollectBlog(c echo.Context) error {
 		})
 		if err != nil {
 			global.Global.Log.Warn(err)
-			//err = dao.UpdateBlogCollect(blogId)
-			//if err != nil {
-			//	global.Global.Log.Warn(err)
-			//	return err
-			//}
 			return common.Ok(c, "")
 		}
 	}
 	return common.Ok(c, nil)
 }
 
-//浏览历史
+// GetBlogHistoryList 浏览历史
+func GetBlogHistoryList(c echo.Context) error {
 
-//修改博客的状态
+	return common.Ok(c, nil)
+}
+
+// UpdateBlogStatus 修改博客的状态
+func UpdateBlogStatus(c echo.Context) error {
+	updateStatus := new(UpdateStatus)
+	err := c.Bind(updateStatus)
+	if err != nil {
+		return common.Fail(c, global.BlogCode, global.QueryErr)
+	}
+	if updateStatus.Status > 2 || updateStatus.Status < 0 {
+		return common.Fail(c, global.BlogCode, global.QueryErr)
+	}
+	//判断是否是这个人的博客
+
+	//判断博客是否存在
+	value := global.Global.Redis.SIsMember(global.Global.Ctx, global.BlogText+":IdList", updateStatus.BlogId).Val()
+	if !value {
+		return common.Fail(c, global.BlogCode, global.BlogNotFound)
+	}
+	//修改数据库
+	err = dao.UpdateStatus(updateStatus.BlogId, updateStatus.Status)
+	if err != nil {
+		global.Global.Log.Warn(err)
+		return common.Fail(c, global.BlogCode, "修改失败")
+	}
+	return common.Ok(c, nil)
+}
 
 //博客详情
 

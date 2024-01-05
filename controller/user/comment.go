@@ -24,11 +24,12 @@ func PushComment(c echo.Context) error {
 
 // DeleteComment 删除评论
 func DeleteComment(c echo.Context) error {
+
 	return common.Ok(c, nil)
 
 }
 
-// GetCommentList 获取评论
+// GetCommentList 获取评论列表
 func GetCommentList(c echo.Context) error {
 	blogId := c.QueryParam("blog_id")
 	if blogId == "" {

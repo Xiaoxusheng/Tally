@@ -68,6 +68,10 @@ type TencentCos struct {
 	SecretKey string `json:"secretKey,omitempty" yaml:"secretKey"`
 }
 
+type Pool struct {
+	Num int `json:"num" yaml:"num"`
+}
+
 type Configs struct {
 	Service    Service
 	Mysql      Mysql
@@ -77,6 +81,7 @@ type Configs struct {
 	Oauth2     Oauth2
 	SparkDesk  SparkDesk
 	TencentCos TencentCos
+	Pool       Pool
 }
 
 var Config Configs

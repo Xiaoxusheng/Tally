@@ -35,3 +35,8 @@ func DeleteBlogByUserIdentity(UserId string) error {
 	blog := new(models.Blog)
 	return global.Global.Mysql.Where("user_identity=?", UserId).Delete(blog).Error
 }
+
+func UpdateStatus(id string, status int) error {
+	blog := new(models.Blog)
+	return global.Global.Mysql.Model(blog).Where("identity=?", id).Update("is_hide", status).Error
+}
