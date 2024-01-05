@@ -17,10 +17,13 @@ type Service struct {
 
 // Mysql 数据库
 type Mysql struct {
-	Database string `json:"database" yaml:"database"`
-	Username string `json:"username" yaml:"username"`
-	Password string `json:"password" yaml:"password"`
-	Url      string `json:"url" yaml:"url"`
+	Database        string `json:"database" yaml:"database"`
+	Username        string `json:"username" yaml:"username"`
+	Password        string `json:"password" yaml:"password"`
+	MaxIdleCons     int    `json:"maxIdleCons" yaml:"maxIdleCons"`
+	MaxOpenCons     int    `json:"max_open_cons" yaml:"maxOpenCons"`
+	ConnMaxLifetime int    `json:"connMaxLifetime" yaml:"connMaxLifetime"`
+	Url             string `json:"url" yaml:"url"`
 }
 
 // Redis

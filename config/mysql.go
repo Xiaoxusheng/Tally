@@ -35,6 +35,16 @@ func InitMysql() {
 			}
 			db.Debug()
 			global.Global.Log.Info("mysql初始化成功")
+			mysqlDB, _ := db.DB()
+
+			// SetMaxIdleConns 用于设置连接池中空闲连接的最大数量。
+			mysqlDB.SetMaxIdleConns(Config.Mysql.MaxIdleCons)
+
+			// SetMaxOpenConns 设置打开数据库连接的最大数量。
+			mysqlDB.SetMaxOpenConns(Config.Mysql.MaxOpenCons)
+
+			// SetConnMaxLifetime 设置了连接可复用的最大时间。
+			mysqlDB.SetConnMaxLifetime(time.Minute * time.Duration(Config.Mysql.ConnMaxLifetime))
 			global.Global.Mysql = db
 		})
 	//建表
