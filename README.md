@@ -1,9 +1,12 @@
 ## 使用 echo+gorm+redis实现
 
+### 2
+
+<img src=" https://img.shields.io/badge/golang 1.21-blue" alt="Go badge">
+
 ### 1 sql语句
 
 ![img.png](sql/img.png)
-
 ### 2 配置文件config,yaml,修改配置
 
 ```yaml
@@ -89,7 +92,6 @@ go run main.go
  du -h /root/tally  查看文件夹占用大小
  go build -o talk -ldflags "-s  -w"  打包可执行文件
 ```
-
 
 
 
