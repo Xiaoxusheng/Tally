@@ -18,6 +18,7 @@ const (
 
 // redis 使用前缀
 const (
+	SignIn          = "sign-in"
 	UserFollow      = "follow"
 	BanUser         = "ban_user"
 	ListKey         = "kind_list"
@@ -34,6 +35,7 @@ const (
 const (
 	UserNotFound         = "用户不存在！"
 	BannedUser           = "用户被封禁！"
+	ChangeUserInfo       = "修改用户信息失败！"
 	LoginErr             = "用户名或密码错误！"
 	PassISNull           = "密码不能为空！"
 	PasswordIeErr        = "密码错误！"

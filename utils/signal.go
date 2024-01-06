@@ -27,6 +27,7 @@ func Listen() {
 			if err != nil {
 				return
 			}
+			global.Global.Log.Info("mysql connect close success")
 			err = db.Close()
 			if err != nil {
 				global.Global.Log.Warn("mysql close err:", err)
@@ -35,6 +36,7 @@ func Listen() {
 			if err != nil {
 				global.Global.Log.Warn("redis close err:", err)
 			}
+			global.Global.Log.Info("redis connect close success")
 			os.Exit(0)
 		}
 

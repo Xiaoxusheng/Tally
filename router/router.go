@@ -24,6 +24,8 @@ func Routers(e *echo.Echo) {
 	users.GET("/list", user.TallyList)
 	users.GET("/info", user.Info)
 	users.GET("/change_pwd", user.ChangePwd)
+	users.GET("/change_user_info", user.ChangeUserInfo)
+	users.GET("/login_info", user.LoginInfo)
 	users.GET("/sign_out", user.SignOut)
 	users.GET("/follow", user.FollowUser)
 	users.GET("/cancel_follow", user.CancelFollow)

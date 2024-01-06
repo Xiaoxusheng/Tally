@@ -12,6 +12,8 @@ import (
 	"github.com/labstack/echo/v4"
 	"golang.org/x/oauth2"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -52,9 +54,11 @@ func Register(c echo.Context) error {
 	id := utils.GetUidV5(user.Username)
 	err = dao.InsertUser(&models.User{
 		Username: user.Username,
+		Account:  utils.GetAccount(),
 		Password: utils.Md5(user.Password),
 		Phone:    user.Phone,
 		Identity: id,
+		GithubId: " ",
 		Status:   0,
 		IsHide:   false,
 		IP:       c.RealIP(),
@@ -63,9 +67,9 @@ func Register(c echo.Context) error {
 		global.Global.Log.Warn(err)
 		return common.Fail(c, global.UserCode, "注册失败！")
 	}
-	go func() {
+	global.Global.Pool.Submit(func() {
 		global.Global.Redis.HSet(global.Global.Ctx, user.Username, user.Password, id)
-	}()
+	})
 	return common.Ok(c, nil)
 }
 
@@ -80,7 +84,7 @@ func SignOut(c echo.Context) error {
 		return common.Fail(c, global.UserCode, global.UserIdentityErr)
 	}
 	//删除数据
-	go func() {
+	global.Global.Pool.Submit(func() {
 		/*
 			删除redis
 		*/
@@ -107,8 +111,7 @@ func SignOut(c echo.Context) error {
 		if err != nil {
 			global.Global.Log.Warn(err)
 		}
-
-	}()
+	})
 	return common.Ok(c, nil)
 }
 
@@ -130,14 +133,18 @@ func Login(c echo.Context) error {
 	//获取token
 	res := global.Global.Redis.Get(global.Global.Ctx, val).Val()
 	if res != "" {
+		// 打卡
+		global.Global.Redis.SetBit(global.Global.Ctx, global.SignIn+val, int64(time.Now().Day()-1), 1)
 		return common.Ok(c, map[string]any{"token": res})
 	} else {
 		token := utils.GetToken(val)
 		if val != "" {
 			global.Global.Log.Info("identity的值", val)
-			go func() {
+			global.Global.Pool.Submit(func() {
 				global.Global.Redis.Set(global.Global.Ctx, val, token, config.Config.Jwt.Time*time.Hour)
-			}()
+				//打卡
+				global.Global.Redis.SetBit(global.Global.Ctx, global.SignIn+val, int64(time.Now().Day()-1), 1)
+			})
 			return common.Ok(c, map[string]any{"token": token})
 		} else {
 			//数据库中获取
@@ -145,19 +152,20 @@ func Login(c echo.Context) error {
 			if ok == nil {
 				return common.Fail(c, global.UserCode, global.LoginErr)
 			}
-			token := utils.GetToken(ok.Identity)
+			token = utils.GetToken(ok.Identity)
 			//异步更新
-			go func() {
+			global.Global.Pool.Submit(func() {
 				global.Global.Redis.HSet(global.Global.Ctx, user.Username, utils.Md5(user.Password), ok.Identity)
 				//	放入token
 				global.Global.Redis.Set(global.Global.Ctx, ok.Identity, token, config.Config.Jwt.Time*time.Hour)
-			}()
+				//	打卡
+				global.Global.Redis.SetBit(global.Global.Ctx, global.SignIn+ok.Identity, int64(time.Now().Day()-1), 1)
+			})
 			return common.Ok(c, map[string]any{
 				"token": token,
 			})
 		}
 	}
-
 }
 
 // Logout 登出
@@ -194,7 +202,7 @@ func Info(c echo.Context) error {
 		if info == nil {
 			return common.Fail(c, global.UserCode, "获取个人信息失败")
 		}
-		go func() {
+		global.Global.Pool.Submit(func() {
 			marshal, err := json.Marshal(info)
 			if err != nil {
 				global.Global.Log.Warn(err)
@@ -202,7 +210,7 @@ func Info(c echo.Context) error {
 			}
 			val, err := global.Global.Redis.Set(global.Global.Ctx, identity+"info", marshal, 0).Result()
 			fmt.Println(val, err)
-		}()
+		})
 		return common.Ok(c, info)
 	}
 }
@@ -229,9 +237,9 @@ func ChangePwd(c echo.Context) error {
 		return common.Fail(c, global.UserCode, global.ChangePassword)
 	}
 	//删除redis中存放的信息
-	go func() {
+	global.Global.Pool.Submit(func() {
 		global.Global.Redis.Del(global.Global.Ctx, ok.Username)
-	}()
+	})
 	//删除缓存
 	return common.Ok(c, nil)
 }
@@ -281,7 +289,49 @@ func Token(c echo.Context) error {
 
 }
 
-// UpdateUserInfo 修改用户信息
-func UpdateUserInfo(c echo.Context) error {
+// ChangeUserInfo 修改用户信息
+func ChangeUserInfo(c echo.Context) error {
+	//获取用户信息
+	id := utils.GetIdentity(c, "identity")
+	if id == "" {
+		global.Global.Log.Warn("identity is null")
+		return common.Fail(c, global.UserCode, global.QueryErr)
+	}
+	user := new(global.User)
+	err := c.Bind(user)
+	if err != nil {
+		global.Global.Log.Warn(err)
+		return common.Fail(c, global.UserCode, global.ParseErr)
+	}
+	err = dao.UpdateAll(id, user)
+	if err != nil {
+		global.Global.Log.Warn(err)
+		return common.Fail(c, global.UserCode, global.ChangeUserInfo)
+	}
+	global.Global.Pool.Submit(func() {
+		_, err = global.Global.Redis.Del(global.Global.Ctx, id+"info").Result()
+		global.Global.Log.Warn(err)
+	})
 	return common.Ok(c, nil)
+}
+
+// LoginInfo 获取登陆情况
+func LoginInfo(c echo.Context) error {
+	id := utils.GetIdentity(c, "identity")
+	if id == "" {
+		global.Global.Log.Warn("identity is null")
+		return common.Fail(c, global.UserCode, global.QueryErr)
+	}
+	d := time.Now().Day()
+	val := global.Global.Redis.BitField(global.Global.Ctx, global.SignIn+id, "GET", "u"+strconv.Itoa(d), 0).Val()
+	global.Global.Log.Info(val)
+	s := strings.Builder{}
+	if val[0] == 1 {
+		for i := 1; i < d; i++ {
+			s.WriteString("0")
+		}
+		s.WriteString("1")
+		return common.Ok(c, s.String())
+	}
+	return common.Ok(c, fmt.Sprintf("%b", val[0]))
 }

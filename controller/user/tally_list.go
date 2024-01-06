@@ -52,14 +52,14 @@ func TallyList(c echo.Context) error {
 		if list == nil {
 			return common.Fail(c, global.TallyCode, global.UserIdentityErr)
 		}
-		go func() {
+		global.Global.Pool.Submit(func() {
 			marshal, err := json.Marshal(list)
 			if err != nil {
 				return
 			}
 			val, err := global.Global.Redis.Set(global.Global.Ctx, global.TallyListKey+id, marshal, 0).Result()
 			fmt.Println(val, err)
-		}()
+		})
 		return common.Ok(c, list)
 	}
 
@@ -87,11 +87,11 @@ func AddTallyLog(c echo.Context) error {
 	if err != nil {
 		return common.Fail(c, global.TallyCode, "添加失败")
 	}
-	go func() {
+	global.Global.Pool.Submit(func() {
 		val, err := global.Global.Redis.Del(global.Global.Ctx, userIdentity+"list").Result()
 		global.Global.Redis.Del(global.Global.Ctx, userIdentity+strconv.Itoa(t.Category))
 		fmt.Println("删除", val, err)
-	}()
+	})
 	return common.Ok(c, nil)
 }
 
@@ -118,14 +118,14 @@ func AllotKind(c echo.Context) error {
 			return err
 		}
 		list := dao.GetTallyKind(userIdentity, n)
-		go func() {
+		global.Global.Pool.Submit(func() {
 			marshal, err := json.Marshal(list)
 			if err != nil {
 				return
 			}
 			//存入redis
 			global.Global.Redis.Set(global.Global.Ctx, userIdentity+category, marshal, 0)
-		}()
+		})
 		return common.Ok(c, list)
 	}
 }
@@ -166,13 +166,13 @@ func DateList(c echo.Context) error {
 			}()
 			return common.Fail(c, global.TallyCode, "查询失败")
 		}
-		go func() {
+		global.Global.Pool.Submit(func() {
 			marshal, err := json.Marshal(list)
 			if err != nil {
 				return
 			}
 			global.Global.Redis.Set(global.Global.Ctx, userIdentity+strconv.FormatInt(t.EndTime, 10), marshal, time.Duration(utils.GetRandom(10))*time.Minute)
-		}()
+		})
 		return common.Ok(c, list)
 	}
 }

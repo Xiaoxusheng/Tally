@@ -7,13 +7,14 @@ import (
 // User 用户
 type User struct {
 	gorm.Model
-	Username string `gorm:"type:varchar(10);not null ; comment:'用户名'" json:"username,omitempty"`
+	Username string `gorm:"type:varchar(10);not null unique; comment:'用户名'" json:"username,omitempty"`
+	Account  int64  `gorm:"type:int not null unique;comment:'账号'" json:"account,omitempty"`
 	Password string `gorm:"type:varchar(36);not null ; comment:'密码'" json:"password,omitempty"`
 	Phone    string `gorm:"type:varchar(11) not null unique ; comment:'手机号'" json:"phone,omitempty"`
 	Identity string `gorm:"type:varchar(36) not null unique ; comment:'唯一标识'" json:"identity,omitempty"`
-	GithubId string `gorm:"type:varchar(36) not null unique ; comment:'Github账号'" json:"githubId,omitempty"`
-	Status   int    `gorm:"type:int ; comment:'0表示正常, 1表示封禁'" json:"status"`
-	IsHide   bool   `gorm:"type:int ; comment:'是否隐私账号'" json:"isHide"`
+	GithubId string `gorm:"type:varchar(36) not null  default='123' ; comment:'Github账号'" json:"githubId,omitempty"`
+	Status   int    `gorm:"type:int ; comment:'0表示正常, 1表示封禁'" json:"status,omitempty"`
+	IsHide   bool   `gorm:"type:int ; comment:'是否隐私账号'" json:"isHide,omitempty"`
 	IP       string `gorm:"type:varchar(64) not null ; comment:'IP地址'" json:"IP,omitempty"`
 }
 

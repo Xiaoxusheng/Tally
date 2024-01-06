@@ -51,7 +51,7 @@ func Set() {
 						for j := 0; j < len(val); j++ {
 							err := dao.DeleteBlogCollect(val[j])
 							if err != nil {
-								log.Println("删除出错", err)
+								global.Global.Log.Warn("删除出错", err)
 								return
 							}
 						}
@@ -59,9 +59,8 @@ func Set() {
 					if strings.Contains(list[i], global.BlogCollects) {
 						//拼接
 						val := global.Global.Redis.SMembers(global.Global.Ctx, list[i]).Val()
-						global.Global.Log.Error(val)
-
 						global.Global.Log.Info(val)
+
 						for j := 0; j < len(val); j++ {
 							err := dao.UpdateBlogCollect(val[j])
 							if err != nil {
@@ -79,7 +78,7 @@ func Set() {
 						id := list[i][len(global.UserFollow):]
 						//获取值
 						val := global.Global.Redis.SMembers(global.Global.Ctx, list[i]).Val()
-						global.Global.Log.Error(val)
+						global.Global.Log.Info(val)
 						//写入数据库
 						global.Global.Log.Info(val, id, val[0], len(val))
 						for i := 0; i < len(val); i++ {

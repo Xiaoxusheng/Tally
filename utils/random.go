@@ -33,3 +33,8 @@ func GetLetter() string {
 	return string(s)
 
 }
+
+func GetAccount() int64 {
+	rand.NewSource(time.Now().UnixNano())
+	return rand.Int63n(1000000000)
+}
