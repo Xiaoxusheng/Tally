@@ -16,7 +16,7 @@ import (
 
 type Log struct {
 	io.Writer
-	m    int32
+	m    int64
 	lock sync.Mutex
 }
 
@@ -55,7 +55,7 @@ func (l *Log) Write(p []byte) (n int, err error) {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 	n, err = l.Writer.Write(p)
-	atomic.AddInt32(&l.m, int32(n))
+	atomic.AddInt64(&l.m, int64(n))
 	//fmt.Printf("日志大小 %d kb", l.m/1024)
 	return n, err
 }
@@ -68,33 +68,44 @@ func (l *Log) logFile(m *log.Logger) {
 		log.Println(err)
 		return
 	}
+	_, err = file.Seek(0, 2)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	stat, err := file.Stat()
+	size := stat.Size()
+	l.m = atomic.LoadInt64(&size)
 	l.Writer = file
-	m.Info("创建成功")
+	fmt.Println("创建成功")
 	s := time.NewTicker(time.Minute * 60 * 24)
-	//l := &Log{
-	//	Writer: file,
-	//	m:      0,
-	//	lock:   sync.Mutex{},
-	//}
 	//输出到控制台
 	m.SetOutput(io.MultiWriter(os.Stdout, l))
-	go func() {
-		global.Global.Log.Info("进入log")
+	go func(l *Log, file *os.File) {
+		fmt.Printf("进入log")
 		for {
 			select {
 			case <-s.C:
 				//	判读是否超过100m
 				if l.m > 100*(1024*1024) {
-					file.Close()
+					err = file.Close()
+					if err != nil {
+						m.Warn(err)
+						return
+					}
 					t = strings.ReplaceAll(time.Now().Format(time.DateOnly+"-"+time.TimeOnly), ":", "-")
-					file, err = os.Open(t + ".log")
-					l := &Log{
+					file, err = os.OpenFile(Config.Logs.Path+t+".log", os.O_CREATE|os.O_RDWR, os.ModePerm)
+					if err != nil {
+						log.Println(err)
+						return
+					}
+					l = &Log{
 						Writer: file,
 						m:      0,
 						lock:   sync.Mutex{},
 					}
 					//输出到控制台,日志文件中
-					m.SetOutput(io.MultiWriter(os.Stdout, l.Writer))
+					m.SetOutput(io.MultiWriter(os.Stdout, l))
 				} else {
 					global.Global.Log.Info("进入删除")
 					//删除一个月之前日志
@@ -124,7 +135,7 @@ func (l *Log) logFile(m *log.Logger) {
 				}
 			}
 		}
-	}()
+	}(l, file)
 
 }
 

@@ -34,9 +34,7 @@ func main() {
 
 	e := echo.New()
 	e.Debug = true
-
-	e.Use(middleware.Logger(), middleware.Recover(), middleware.CORS(), middleware.RequestID())
+	e.Use(middleware.Logger(), middleware.Recover(), middleware.CORS(), middleware.RequestID(), middleware.Timeout())
 	router.Routers(e)
-
 	e.Logger.Fatal(e.Start(":" + strconv.Itoa(config.Config.Service.Port)))
 }
