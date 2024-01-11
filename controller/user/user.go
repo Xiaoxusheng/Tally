@@ -143,7 +143,13 @@ func Login(c echo.Context) error {
 			global.Global.Pool.Submit(func() {
 				global.Global.Redis.Set(global.Global.Ctx, val, token, config.Config.Jwt.Time*time.Hour)
 				//打卡
-				global.Global.Redis.SetBit(global.Global.Ctx, global.SignIn+val, int64(time.Now().Day()-1), 1)
+				result, err := global.Global.Redis.SetBit(global.Global.Ctx, global.SignIn+val, int64(time.Now().Day()-1), 1).Result()
+				if err != nil {
+					global.Global.Log.Warn(result, err)
+					return
+				}
+				fmt.Println("执行")
+
 			})
 			return common.Ok(c, map[string]any{"token": token})
 		} else {
@@ -310,7 +316,9 @@ func ChangeUserInfo(c echo.Context) error {
 	}
 	global.Global.Pool.Submit(func() {
 		_, err = global.Global.Redis.Del(global.Global.Ctx, id+"info").Result()
-		global.Global.Log.Warn(err)
+		if err != nil {
+			global.Global.Log.Warn(err)
+		}
 	})
 	return common.Ok(c, nil)
 }
