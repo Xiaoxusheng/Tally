@@ -14,3 +14,5 @@ type User struct {
 	Phone    string `json:"phone,omitempty" form:"phone" param:"phone" query:"phone"`
 	GithubId string `json:"githubId,omitempty" form:"githubId" param:"githubId" query:"githubId"`
 }
+
+//*处理异步数据的管道*/

@@ -54,6 +54,7 @@ const (
 	BlogErr              = "新增博客失败！"
 	LikesErr             = "点赞失败！"
 	LikesAlreadyErr      = "已经点赞！"
+	GetLikeListErr       = "获取点赞列表失败！"
 	QueryErr             = "获取必要参数失败！"
 	BlogCollect          = "收藏博客失败！"
 	BlogNotFound         = "博客不存在！"

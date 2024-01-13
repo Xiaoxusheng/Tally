@@ -44,13 +44,14 @@ func FollowUser(c echo.Context) error {
 	}
 	//判断是否已经关注
 	if global.Global.Redis.SIsMember(global.Global.Ctx, global.UserFollow+id, identity).Val() {
-		return common.Fail(c, global.UserCode, global.AlreadyFollow)
+		//return common.Fail(c, global.UserCode, global.AlreadyFollow)
+		return common.Picture(c, "1.mp4")
 	}
 	//判断是否封禁
 	if global.Global.Redis.SIsMember(global.Global.Ctx, global.BanUser, identity).Val() {
 		return common.Fail(c, global.UserCode, global.BannedUser)
 	}
-	//关注
+
 	val := global.Global.Redis.SAdd(global.Global.Ctx, global.UserFollow+id, identity).Val()
 	//	加入关注列表
 	if val == global.Fail {
@@ -114,4 +115,22 @@ func GetFollowList(c echo.Context) error {
 	}
 	followList := dao.GetFollowList(id)
 	return common.Ok(c, followList)
+}
+
+// TogetherFollow 共同关注
+func TogetherFollow(c echo.Context) error {
+	//获取对方的id
+	otherId := c.QueryParam("otherId")
+	if otherId == "" {
+		return common.Fail(c, global.UserCode, global.QueryErr)
+	}
+	//判断是否存在
+	//用户id
+	id := utils.GetIdentity(c, "identity")
+	if id == "" {
+		return common.Fail(c, global.UserCode, global.QueryErr)
+	}
+	val := global.Global.Redis.SInter(global.Global.Ctx, id, otherId).Val()
+	//
+	return common.Ok(c, val)
 }

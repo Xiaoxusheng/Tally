@@ -5,7 +5,6 @@ import (
 	"Tally/global"
 	"Tally/models"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"strings"
 	"time"
 )
@@ -32,15 +31,24 @@ func Set() {
 					//记录点赞
 					if strings.Contains(list[i], global.BlogSetLikesKey) {
 						fmt.Println(list[i][len("blogLikesSet"):], list[i])
-						val := global.Global.Redis.Get(global.Global.Ctx, global.BlogLikesKey+list[i][len(global.BlogSetLikesKey):]).Val()
-						fmt.Println("v", val)
-						if val == "" {
-							continue
-						}
-						err := dao.UpdateLikes(list[i][len(global.BlogSetLikesKey):], val)
-						if err != nil {
-							global.Global.Log.Warn("插入出差", err)
-							return
+						//记录点赞的string
+						//list[i][len(global.BlogSetLikesKey):]为玩家id
+						/*
+							原先的思路是，读取博客id然后对博客进行的更新
+							现在的思路是，用管道进行处理
+						*/
+						values := global.Global.Redis.SMembers(global.Global.Ctx, global.BlogSetLikesKey+list[i][len(global.BlogSetLikesKey):]).Val()
+						for i := 0; i < len(values); i++ {
+							val := global.Global.Redis.Get(global.Global.Ctx, values[i]).Val()
+							global.Global.Log.Error("v", val)
+							if val == "" {
+								continue
+							}
+							err := dao.UpdateLikes(list[i][len(global.BlogSetLikesKey):], val)
+							if err != nil {
+								global.Global.Log.Error("update出差", err)
+								return
+							}
 						}
 					}
 					//收藏
@@ -51,7 +59,7 @@ func Set() {
 						for j := 0; j < len(val); j++ {
 							err := dao.DeleteBlogCollect(val[j])
 							if err != nil {
-								global.Global.Log.Warn("删除出错", err)
+								global.Global.Log.Error("删除出错", err)
 								return
 							}
 						}
@@ -64,7 +72,7 @@ func Set() {
 						for j := 0; j < len(val); j++ {
 							err := dao.UpdateBlogCollect(val[j])
 							if err != nil {
-								log.Println("更新出错", err)
+								global.Global.Log.Error("更新出错", err)
 								return
 							}
 						}

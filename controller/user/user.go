@@ -215,7 +215,7 @@ func Info(c echo.Context) error {
 				return
 			}
 			val, err := global.Global.Redis.Set(global.Global.Ctx, identity+"info", marshal, 0).Result()
-			fmt.Println(val, err)
+			global.Global.Log.Info(val, err)
 		})
 		return common.Ok(c, info)
 	}

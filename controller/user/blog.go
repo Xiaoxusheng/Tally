@@ -99,12 +99,14 @@ func BlogText(c echo.Context) error {
 			Score:  float64(time.Now().Unix()),
 			Member: text,
 		}).Result()
+		//写进string
+		global.Global.Redis.Set(global.Global.Ctx, global.BlogText+blogId, text, 0)
 		if err != nil {
 			global.Global.Log.Warn(err)
 		}
 		result, err := global.Global.Redis.ZRange(global.Global.Ctx, global.BlogText, 0, time.Now().Unix()).Result()
 		if err != nil {
-			return
+			global.Global.Log.Warn(err)
 		}
 		fmt.Println(result)
 		//把博客id存入set
@@ -137,11 +139,11 @@ func Likes(c echo.Context) error {
 		return common.Fail(c, global.LikesCode, global.BlogNotFound)
 	}
 	//判断是否已经点赞
-	val := global.Global.Redis.SIsMember(global.Global.Ctx, global.BlogSetLikesKey+blogId, id).Val()
+	val := global.Global.Redis.SIsMember(global.Global.Ctx, global.BlogSetLikesKey+id, blogId).Val()
 	fmt.Println("vals", val)
 	if val {
 		//删除
-		global.Global.Redis.SRem(global.Global.Ctx, global.BlogSetLikesKey+blogId, id)
+		global.Global.Redis.SRem(global.Global.Ctx, global.BlogSetLikesKey+id, blogId)
 		res, err := global.Global.Redis.IncrBy(global.Global.Ctx, global.BlogLikesKey+blogId, -1).Result()
 		global.Global.Log.Info(res, err)
 		if err != nil {
@@ -150,10 +152,11 @@ func Likes(c echo.Context) error {
 		return common.Fail(c, global.LikesCode, global.LikesAlreadyErr)
 	}
 	//添加进集合
-	result, err := global.Global.Redis.SAdd(global.Global.Ctx, global.BlogSetLikesKey+blogId, id).Result()
+	result, err := global.Global.Redis.SAdd(global.Global.Ctx, global.BlogSetLikesKey+id, blogId).Result()
 	global.Global.Log.Info("reslu", result)
 	if err != nil {
-		return err
+		global.Global.Log.Warn(err)
+		return common.Fail(c, global.LikesCode, global.LikesErr)
 	}
 	//加1
 	res, err := global.Global.Redis.IncrBy(global.Global.Ctx, global.BlogLikesKey+blogId, 1).Result()
@@ -166,6 +169,7 @@ func Likes(c echo.Context) error {
 
 // IsLike 查询是否点赞
 func IsLike(c echo.Context) error {
+	//博客id
 	blogId := c.QueryParam("blogId")
 	if blogId == "" {
 		return common.Fail(c, global.LikesCode, global.QueryErr)
@@ -179,6 +183,28 @@ func IsLike(c echo.Context) error {
 	return common.Ok(c, map[string]bool{
 		"is_like": val,
 	})
+}
+
+// LikeList 每个人的的点赞列表
+func LikeList(c echo.Context) error {
+	id := utils.GetIdentity(c, "identity")
+	if id == "" {
+		return common.Fail(c, global.BlogCode, global.UserIdentityErr)
+	}
+	list := make([]*models.Blog, 0, global.Global.Redis.SCard(global.Global.Ctx, global.BlogSetLikesKey+id).Val())
+	//获取点赞
+	val := global.Global.Redis.SMembers(global.Global.Ctx, global.BlogSetLikesKey+id).Val()
+	for _, res := range val {
+		blog := new(models.Blog)
+		text := global.Global.Redis.Get(global.Global.Ctx, global.BlogText+res).Val()
+		err := json.Unmarshal([]byte(text), blog)
+		if err != nil {
+			global.Global.Log.Warn(err)
+			return common.Fail(c, global.LikesCode, global.GetLikeListErr)
+		}
+		list = append(list, blog)
+	}
+	return common.Ok(c, list)
 }
 
 // BlogList 博客列表
@@ -374,7 +400,20 @@ func UpdateBlogStatus(c echo.Context) error {
 	return common.Ok(c, nil)
 }
 
-//博客详情
+// BlogDetail 博客详情
+func BlogDetail(c echo.Context) error {
+	//获取博客id
+
+	//判断是否存在
+
+	//获取博客信息
+
+	//获取点赞收藏等
+
+	//
+
+	return common.Ok(c, nil)
+}
 
 // DeleteBlog 删除博客
 func DeleteBlog(c echo.Context) error {
