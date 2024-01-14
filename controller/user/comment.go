@@ -16,6 +16,7 @@ func PushComment(c echo.Context) error {
 	//获取
 
 	//异步检验内容
+
 	//送进消息队列中
 
 	//发布

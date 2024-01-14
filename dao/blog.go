@@ -31,9 +31,9 @@ func GetIdByBlog(id string) string {
 	return blog.UserIdentity
 }
 
-func DeleteBlogByUserIdentity(UserId string) error {
+func DeleteBlogByIdentity(id string) error {
 	blog := new(models.Blog)
-	return global.Global.Mysql.Where("user_identity=?", UserId).Delete(blog).Error
+	return global.Global.Mysql.Where("identity=?", id).Delete(blog).Error
 }
 
 func UpdateStatus(id string, status int) error {

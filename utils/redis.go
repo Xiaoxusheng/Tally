@@ -106,6 +106,8 @@ func Set() {
 							global.Global.Redis.SAdd(global.Global.Ctx, "key"+id, val[i])
 						}
 					}
+					//	删除
+
 				}
 
 			}()

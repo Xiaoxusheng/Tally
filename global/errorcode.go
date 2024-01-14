@@ -29,6 +29,8 @@ const (
 	BlogText        = "blogText"
 	BlogCollects    = "blogCollect"
 	BlogCollectRem  = "blogCollectRem"
+	BlogHistory     = "blogHistory"
+	BlogMap         = "blogMap"
 )
 
 // 错误信息

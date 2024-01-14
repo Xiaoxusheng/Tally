@@ -15,4 +15,8 @@ type User struct {
 	GithubId string `json:"githubId,omitempty" form:"githubId" param:"githubId" query:"githubId"`
 }
 
-//*处理异步数据的管道*/
+type Comment struct {
+	BlogID   string `json:"blog_id," query:"blog_id" form:"blog_id"  param:"blog_id"`
+	Text     string `json:"text" query:"text" form:"text" param:"text"`
+	ParentID string `json:"parent_id,omitempty" query:"parent_id" form:"parent_id" param:"parent_id"`
+}

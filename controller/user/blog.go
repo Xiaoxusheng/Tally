@@ -89,21 +89,28 @@ func BlogText(c echo.Context) error {
 		global.Global.Log.Warn(err)
 		return common.Fail(c, global.BlogCode, global.BlogErr)
 	}
+	//异步写入
 	global.Global.Pool.Submit(func() {
+		//去判断内容是否违规
+
 		text, err := json.Marshal(blogs)
 		if err != nil {
 			return
 		}
 		//写进sortSet
+		t := time.Now().Unix()
 		_, err = global.Global.Redis.ZAdd(global.Global.Ctx, global.BlogText, redis.Z{
-			Score:  float64(time.Now().Unix()),
+			Score:  float64(t),
 			Member: text,
 		}).Result()
 		//写进string
+
+		//存博客内容
 		global.Global.Redis.Set(global.Global.Ctx, global.BlogText+blogId, text, 0)
 		if err != nil {
 			global.Global.Log.Warn(err)
 		}
+		//
 		result, err := global.Global.Redis.ZRange(global.Global.Ctx, global.BlogText, 0, time.Now().Unix()).Result()
 		if err != nil {
 			global.Global.Log.Warn(err)
@@ -114,7 +121,7 @@ func BlogText(c echo.Context) error {
 		if err != nil {
 			global.Global.Log.Warn(err)
 		}
-		//点赞
+		//初始化点赞
 		_, err = global.Global.Redis.Set(global.Global.Ctx, global.BlogLikesKey+blogId, 0, 0).Result()
 		if err != nil {
 			global.Global.Log.Warn(err)
@@ -194,16 +201,19 @@ func LikeList(c echo.Context) error {
 	list := make([]*models.Blog, 0, global.Global.Redis.SCard(global.Global.Ctx, global.BlogSetLikesKey+id).Val())
 	//获取点赞
 	val := global.Global.Redis.SMembers(global.Global.Ctx, global.BlogSetLikesKey+id).Val()
-	for _, res := range val {
-		blog := new(models.Blog)
-		text := global.Global.Redis.Get(global.Global.Ctx, global.BlogText+res).Val()
-		err := json.Unmarshal([]byte(text), blog)
-		if err != nil {
-			global.Global.Log.Warn(err)
-			return common.Fail(c, global.LikesCode, global.GetLikeListErr)
+	if len(val) == 0 {
+		for _, res := range val {
+			blog := new(models.Blog)
+			text := global.Global.Redis.Get(global.Global.Ctx, global.BlogText+res).Val()
+			err := json.Unmarshal([]byte(text), blog)
+			if err != nil {
+				global.Global.Log.Warn(err)
+				return common.Fail(c, global.LikesCode, global.GetLikeListErr)
+			}
+			list = append(list, blog)
 		}
-		list = append(list, blog)
 	}
+
 	return common.Ok(c, list)
 }
 
@@ -220,7 +230,7 @@ func BlogList(c echo.Context) error {
 	var t1 float64 = 0
 	var count int64 = 1
 	fmt.Println("val", val)
-	//val
+	//val 取过数据
 	if val != global.Fail {
 		t := time.Now()
 		d := time.Date(t.Year(), t.Month(), t.Day()-1, t.Hour(), t.Minute(), t.Second(), 0, t.Location())
@@ -231,6 +241,7 @@ func BlogList(c echo.Context) error {
 			Offset: 0,
 			Count:  global.Count,
 		}).Val())
+		//不满15条数据都显示
 		if l <= global.Collect {
 			fmt.Println("l", l)
 			val = 0
@@ -271,6 +282,7 @@ func BlogList(c echo.Context) error {
 		}
 		return common.Ok(c, list)
 	}
+	//未取过数据
 	//获取一天范围内的前十条说说
 	t := time.Now()
 	d := time.Date(t.Year(), t.Month(), t.Day()-1, t.Hour(), t.Minute(), t.Second(), 0, t.Location())
@@ -288,7 +300,7 @@ func BlogList(c echo.Context) error {
 	}
 
 	for i := 0; i < len(res); i++ {
-		err := json.Unmarshal([]byte(res[i].Member.(string)), blogText)
+		err = json.Unmarshal([]byte(res[i].Member.(string)), blogText)
 		if err != nil {
 			return err
 		}
@@ -370,7 +382,24 @@ func CollectBlog(c echo.Context) error {
 
 // GetBlogHistoryList 浏览历史
 func GetBlogHistoryList(c echo.Context) error {
-
+	blogId := c.QueryParam("blogId")
+	if blogId == "" {
+		return common.Fail(c, global.BlogCode, global.QueryErr)
+	}
+	id := utils.GetIdentity(c, "identity")
+	if id == "" {
+		return common.Fail(c, global.LikesCode, global.UserIdentityErr)
+	}
+	//判断是否存在
+	value := global.Global.Redis.SIsMember(global.Global.Ctx, global.BlogText+":IdList", blogId).Val()
+	if !value {
+		return common.Fail(c, global.LikesCode, global.BlogNotFound)
+	}
+	//添加进个人记录中
+	_, err := global.Global.Redis.SAdd(global.Global.Ctx, global.BlogHistory+id, blogId).Result()
+	if err != nil {
+		return common.Fail(c, global.BlogCode, global.BlogCollect)
+	}
 	return common.Ok(c, nil)
 }
 
@@ -395,23 +424,32 @@ func UpdateBlogStatus(c echo.Context) error {
 	err = dao.UpdateStatus(updateStatus.BlogId, updateStatus.Status)
 	if err != nil {
 		global.Global.Log.Warn(err)
-		return common.Fail(c, global.BlogCode, "修改失败")
+		return common.Fail(c, global.BlogCode, global.UpdateBlogStatusFail)
 	}
-	return common.Ok(c, nil)
-}
-
-// BlogDetail 博客详情
-func BlogDetail(c echo.Context) error {
-	//获取博客id
-
-	//判断是否存在
-
-	//获取博客信息
-
-	//获取点赞收藏等
-
-	//
-
+	//修改博客状态
+	global.Global.Pool.Submit(func() {
+		//先读取
+		t := global.Global.Redis.Get(global.Global.Ctx, global.BlogText+updateStatus.BlogId).Val()
+		times := global.Global.Redis.ZScore(global.Global.Ctx, global.BlogText, t).Val()
+		blog := new(models.Blog)
+		err = json.Unmarshal([]byte(t), blog)
+		if err != nil {
+			global.Global.Log.Error(err)
+			return
+		}
+		//赋值
+		blog.IsHide = updateStatus.Status == 1
+		marshal, err := json.Marshal(blog)
+		if err != nil {
+			global.Global.Log.Error(err)
+			return
+		}
+		//写入
+		global.Global.Redis.ZAdd(global.Global.Ctx, global.BlogText, redis.Z{
+			Score:  times,
+			Member: marshal,
+		})
+	})
 	return common.Ok(c, nil)
 }
 
@@ -422,6 +460,12 @@ func DeleteBlog(c echo.Context) error {
 	if blogId == "" {
 		return common.Fail(c, global.BlogCode, global.QueryErr)
 	}
+	//判断是否本人博客
+	id := utils.GetIdentity(c, "identity")
+	if id == "" {
+		return common.Fail(c, global.LikesCode, global.UserIdentityErr)
+	}
+
 	//判断博客是否存在
 	value := global.Global.Redis.SIsMember(global.Global.Ctx, global.BlogText+":IdList", blogId).Val()
 	if !value {
@@ -431,6 +475,29 @@ func DeleteBlog(c echo.Context) error {
 	if global.Global.Redis.SRem(global.Global.Ctx, global.BlogText+":IdList", blogId).Val() == global.Fail {
 		return common.Fail(c, global.BlogCode, global.DeleteBlogFail)
 	}
+	blogText := global.Global.Redis.Get(global.Global.Ctx, global.BlogText+blogId).Val()
+	//删除文章
+	res := global.Global.Redis.ZRem(global.Global.Ctx, global.BlogText, blogText).Val()
+	if res == global.Fail {
+		return common.Fail(c, global.BlogCode, global.DeleteBlogFail)
+	}
+	global.Global.Pool.Submit(func() {
+		//节省内存
+		//数据库
+		err := dao.DeleteBlogByIdentity(id)
+		if err != nil {
+			global.Global.Log.Error("delete  blog  fail:", err)
+		}
+		//	删除点赞里面的
+		global.Global.Redis.SRem(global.Global.Ctx, global.BlogSetLikesKey+id, blogId)
+		//记录点赞数
+		global.Global.Redis.Del(global.Global.Ctx, global.BlogLikesKey+blogId)
+		//	收藏里的
+		global.Global.Redis.SRem(global.Global.Ctx, global.BlogCollects+id, blogId)
+		//	浏览记录里的
+		global.Global.Redis.SRem(global.Global.Ctx, global.BlogHistory+id, blogId)
+	})
+
 	return common.Ok(c, nil)
 }
 
