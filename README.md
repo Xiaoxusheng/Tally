@@ -1,7 +1,5 @@
 ## 使用 echo+gorm+redis实现
 
-### 2
-
 <img src=" https://img.shields.io/badge/golang 1.21-blue" alt="Go badge">
 
 ### 1 sql语句
