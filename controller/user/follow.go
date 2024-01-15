@@ -44,8 +44,7 @@ func FollowUser(c echo.Context) error {
 	}
 	//判断是否已经关注
 	if global.Global.Redis.SIsMember(global.Global.Ctx, global.UserFollow+id, identity).Val() {
-		//return common.Fail(c, global.UserCode, global.AlreadyFollow)
-		return common.Picture(c, "1.mp4")
+		return common.Fail(c, global.UserCode, global.AlreadyFollow)
 	}
 	//判断是否封禁
 	if global.Global.Redis.SIsMember(global.Global.Ctx, global.BanUser, identity).Val() {

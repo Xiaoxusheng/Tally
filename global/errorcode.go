@@ -12,8 +12,9 @@ const (
 	FileCode                    //文件
 	BlogCode                    //博客
 	LikesCode                   //点赞
-	Collect                     // 收藏博客
-	CommentCode
+	Collect                     //收藏博客
+	CommentCode                 //评论
+	LogCode                     //日志压缩
 )
 
 // redis 使用前缀
@@ -30,7 +31,6 @@ const (
 	BlogCollects    = "blogCollect"
 	BlogCollectRem  = "blogCollectRem"
 	BlogHistory     = "blogHistory"
-	BlogMap         = "blogMap"
 )
 
 // 错误信息
@@ -62,6 +62,7 @@ const (
 	BlogNotFound         = "博客不存在！"
 	DeleteBlogFail       = "删除博客失败！"
 	UpdateBlogStatusFail = "修改博客状态失败！"
+	CreateLogErr         = "生成zip失败！"
 )
 
 // 日=日志颜色
@@ -76,4 +77,10 @@ const (
 const (
 	Success = 1
 	Fail    = 0
+)
+
+//s为单位
+
+const (
+	InfoTime = 7 * 24 * 60 * 60
 )

@@ -148,8 +148,6 @@ func Login(c echo.Context) error {
 					global.Global.Log.Warn(result, err)
 					return
 				}
-				fmt.Println("执行")
-
 			})
 			return common.Ok(c, map[string]any{"token": token})
 		} else {
@@ -214,7 +212,7 @@ func Info(c echo.Context) error {
 				global.Global.Log.Warn(err)
 				return
 			}
-			val, err := global.Global.Redis.Set(global.Global.Ctx, identity+"info", marshal, 0).Result()
+			val, err := global.Global.Redis.Set(global.Global.Ctx, identity+"info", marshal, global.InfoTime).Result()
 			global.Global.Log.Info(val, err)
 		})
 		return common.Ok(c, info)
@@ -342,4 +340,5 @@ func LoginInfo(c echo.Context) error {
 		return common.Ok(c, s.String())
 	}
 	return common.Ok(c, fmt.Sprintf("%b", val[0]))
+
 }

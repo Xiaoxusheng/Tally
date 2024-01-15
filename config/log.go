@@ -63,12 +63,7 @@ func (l *Log) Write(p []byte) (n int, err error) {
 func (l *Log) logFile(m *log.Logger) {
 	t := time.Now().Format(time.DateOnly)
 	//创建文件
-	file, err := os.OpenFile(Config.Logs.Path+t+".log", os.O_CREATE|os.O_RDWR, os.ModePerm)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	_, err = file.Seek(0, 2)
+	file, err := os.OpenFile(Config.Logs.Path+t+".log", os.O_CREATE|os.O_RDWR|os.O_APPEND, os.ModePerm)
 	if err != nil {
 		log.Println(err)
 		return
