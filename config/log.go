@@ -14,6 +14,8 @@ import (
 	"time"
 )
 
+var o = new(sync.Once)
+
 type Log struct {
 	io.Writer
 	m    int64
@@ -131,12 +133,10 @@ func (l *Log) logFile(m *log.Logger) {
 			}
 		}
 	}(l, file)
-
 }
 
 func InitLog() {
-	once := sync.Once{}
-	once.Do(func() {
+	o.Do(func() {
 		m := log.New()
 		l := &Log{
 			m:    0,

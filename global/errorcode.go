@@ -31,6 +31,7 @@ const (
 	BlogCollects    = "blogCollect"
 	BlogCollectRem  = "blogCollectRem"
 	BlogHistory     = "blogHistory"
+	CommentList     = "commentList"
 )
 
 // 错误信息
@@ -63,6 +64,7 @@ const (
 	DeleteBlogFail       = "删除博客失败！"
 	UpdateBlogStatusFail = "修改博客状态失败！"
 	CreateLogErr         = "生成zip失败！"
+	GetCommentListErr    = "获取评论列表失败！"
 )
 
 // 日=日志颜色
