@@ -37,6 +37,8 @@ func Listen() {
 				global.Global.Log.Warn("redis close err:", err)
 			}
 			global.Global.Log.Info("redis connect close success")
+			//关闭协程池
+			global.Global.Pool.StopWait()
 			os.Exit(0)
 		}
 

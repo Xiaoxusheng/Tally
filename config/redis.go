@@ -8,11 +8,13 @@ import (
 	"time"
 )
 
+var rdb *redis.Client
+var x sync.Once
+
 func InitRedis() {
-	once := sync.Once{}
-	once.Do(
+	x.Do(
 		func() {
-			rdb := redis.NewClient(&redis.Options{
+			rdb = redis.NewClient(&redis.Options{
 				Addr:            Config.Redis.Addr,
 				Password:        Config.Redis.Password, // 没有密码，默认值
 				DB:              Config.Redis.Db,

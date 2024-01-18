@@ -11,9 +11,14 @@ import (
 	"time"
 )
 
+var (
+	onc sync.Once
+	db  *gorm.DB
+	err error
+)
+
 func InitMysql() {
-	once := sync.Once{}
-	once.Do(
+	onc.Do(
 		func() {
 			newLogger := logger.New(
 				log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
@@ -26,7 +31,7 @@ func InitMysql() {
 				},
 			)
 			dsn := Config.Mysql.Username + ":" + Config.Mysql.Password + "@tcp(" + Config.Mysql.Url + ")/" + Config.Mysql.Database + "?charset=utf8mb4&parseTime=True&loc=Local"
-			db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+			db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
 				Logger:      newLogger,
 				PrepareStmt: true,
 			})

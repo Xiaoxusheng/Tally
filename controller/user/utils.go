@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"io"
 	"os"
+	"path"
 )
 
 // ExportLog 压缩日志
@@ -24,9 +25,11 @@ func ExportLog(c echo.Context) error {
 		global.Global.Log.Error(err)
 		return common.Fail(c, global.LogCode, global.CreateLogErr)
 	}
-	defer zipFile.Close()
 	zips := zip.NewWriter(zipFile)
 	for _, res := range dir {
+		if path.Ext(res.Name()) == ".zip" {
+			continue
+		}
 		file, err := os.Open(config.Config.Logs.Path + res.Name())
 		if err != nil {
 			global.Global.Log.Error(err)
@@ -42,13 +45,20 @@ func ExportLog(c echo.Context) error {
 		if err != nil {
 			global.Global.Log.Error(err)
 			return common.Fail(c, global.LogCode, global.CreateLogErr)
-
 		}
 		err = file.Close()
 		if err != nil {
 			global.Global.Log.Error(err)
+			err := zipFile.Close()
+			if err != nil {
+				return err
+			}
 			return common.Fail(c, global.LogCode, global.CreateLogErr)
 		}
+	}
+	err = zipFile.Close()
+	if err != nil {
+		return err
 	}
 	return common.Picture(c, config.Config.Logs.Path+"logfile.zip")
 }

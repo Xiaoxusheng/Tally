@@ -25,6 +25,8 @@ func main() {
 	config.InitRedis()
 	//初始化协程池
 	config.InitPool()
+	//初始化锁
+	config.InitMutex()
 
 	//异步写入数据库
 	go utils.Set()

@@ -10,9 +10,10 @@ import (
 InitPool
 初始化协程池
 */
+var c = sync.Once{}
+
 func InitPool() {
-	once := sync.Once{}
-	once.Do(
+	c.Do(
 		func() {
 			global.Global.Pool = workerpool.New(Config.Pool.Num)
 		},
