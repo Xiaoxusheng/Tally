@@ -75,6 +75,11 @@ type Pool struct {
 	Num int `json:"num" yaml:"num"`
 }
 
+type Kafka struct {
+	Address string `json:"address" yaml:"address"`
+	Port    int    `json:"port" yaml:"port"`
+}
+
 type Configs struct {
 	Service    Service
 	Mysql      Mysql
@@ -85,6 +90,7 @@ type Configs struct {
 	SparkDesk  SparkDesk
 	TencentCos TencentCos
 	Pool       Pool
+	Kafka      Kafka
 }
 
 var Config Configs

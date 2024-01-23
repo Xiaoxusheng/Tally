@@ -72,7 +72,7 @@ const (
 	Red    = 31
 	Yellow = 33
 	Blue   = 36
-	Gray   = 39
+	Gray   = 38
 )
 
 // 常量
@@ -81,8 +81,10 @@ const (
 	Fail    = 0
 )
 
-//s为单位
+//s为单位,redis的过期时间
 
 const (
 	InfoTime = 7 * 24 * 60 * 60
 )
+
+//kafka 相关

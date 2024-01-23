@@ -2,7 +2,6 @@ package utils
 
 import (
 	"Tally/global"
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -19,7 +18,7 @@ func Listen() {
 	for {
 		select {
 		case sig := <-signalCh:
-			fmt.Printf("Received signal: %s\n", sig)
+			global.Global.Log.Printf("Received signal: %s\n", sig)
 			//关闭协程池
 			global.Global.Pool.StopWait()
 			//关闭连接
@@ -39,6 +38,13 @@ func Listen() {
 			global.Global.Log.Info("redis connect close success")
 			//关闭协程池
 			global.Global.Pool.StopWait()
+			//关闭kafka连接
+			err = global.Global.KafKa.Close()
+			if err != nil {
+				global.Global.Log.Warn("kafka close err:", err)
+			}
+			global.Global.Log.Info("kafka connect close success")
+			//退出
 			os.Exit(0)
 		}
 

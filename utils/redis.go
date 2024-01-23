@@ -21,7 +21,7 @@ func Set() {
 		list := Get("set")
 		select {
 		case <-t.C:
-			fmt.Println("list", list)
+			//fmt.Println("list", list)
 			if list == nil {
 				continue
 			}

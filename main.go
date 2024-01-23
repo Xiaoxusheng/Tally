@@ -27,6 +27,8 @@ func main() {
 	config.InitPool()
 	//初始化锁
 	config.InitMutex()
+	//初始化kafka
+	config.InitKafka()
 
 	//异步写入数据库
 	go utils.Set()

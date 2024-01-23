@@ -64,7 +64,14 @@ tencentCos:
   secretId: ""
   secretKey: ""
 
+#协程池
+pool:
+  num: 100
 
+#kafka
+kafka:
+  address: "" 
+  port: 9092
 
 ```
 
@@ -99,6 +106,7 @@ go run main.go
 2 先更新数据库，同时更新缓存(采用的是更新数据库之后，删除旧的缓存，在下一次查询时候在重新写入缓存，避免了无效的写操作，带来性能额外的开销)
 ```
 
+### 7 引入kafka异步解耦
 
 
 
