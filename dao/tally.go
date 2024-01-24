@@ -92,6 +92,7 @@ func CancelCollect(id, useId string) error {
 	return global.Global.Mysql.Model(list).Where("identity=? and user_identity=?", id, useId).Update("collect", false).Error
 }
 
+// GetCollectList 收藏列表
 func GetCollectList(id string) []*models.Tally {
 	list := make([]*models.Tally, 0)
 	err := global.Global.Mysql.Where("user_identity=? and collect=? ", id, true).Find(&list).Error

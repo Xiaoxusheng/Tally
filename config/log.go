@@ -74,12 +74,11 @@ func (l *Log) logFile(m *log.Logger) {
 	size := stat.Size()
 	l.m = atomic.LoadInt64(&size)
 	l.Writer = file
-	fmt.Println("创建成功")
+	fmt.Println("create log fail success!")
 	s := time.NewTicker(time.Minute * 60 * 24)
 	//输出到控制台
 	m.SetOutput(io.MultiWriter(os.Stdout, l))
 	go func(l *Log, file *os.File) {
-		fmt.Printf("进入log")
 		for {
 			select {
 			case <-s.C:

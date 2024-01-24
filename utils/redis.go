@@ -38,13 +38,13 @@ func Set() {
 							现在的思路是，用管道进行处理
 						*/
 						values := global.Global.Redis.SMembers(global.Global.Ctx, global.BlogSetLikesKey+list[i][len(global.BlogSetLikesKey):]).Val()
-						for i := 0; i < len(values); i++ {
-							val := global.Global.Redis.Get(global.Global.Ctx, values[i]).Val()
+						for j := 0; j < len(values); j++ {
+							val := global.Global.Redis.Get(global.Global.Ctx, values[j]).Val()
 							global.Global.Log.Error("v", val)
 							if val == "" {
 								continue
 							}
-							err := dao.UpdateLikes(list[i][len(global.BlogSetLikesKey):], val)
+							err := dao.UpdateLikes(list[j][len(global.BlogSetLikesKey):], val)
 							if err != nil {
 								global.Global.Log.Error("update出差", err)
 								return
@@ -88,28 +88,28 @@ func Set() {
 						val := global.Global.Redis.SMembers(global.Global.Ctx, list[i]).Val()
 						global.Global.Log.Info(val)
 						//写入数据库
-						global.Global.Log.Info(val, id, val[0], len(val))
-						for i := 0; i < len(val); i++ {
-							if global.Global.Redis.SIsMember(global.Global.Ctx, "key"+id, val[i]).Val() {
+						global.Global.Log.Info(val, id, len(val))
+						for j := 0; j < len(val); j++ {
+							if global.Global.Redis.SIsMember(global.Global.Ctx, "key"+id, val[j]).Val() {
 								global.Global.Log.Info("已经写入过")
 								continue
 							}
 							err := dao.InsertFollow(&models.Follow{
 								Identity: GetUidV4(),
 								UserId:   id,
-								FollowId: val[i],
+								FollowId: val[j],
 							})
 							if err != nil {
 								global.Global.Log.Error(err)
 								continue
 							}
-							global.Global.Redis.SAdd(global.Global.Ctx, "key"+id, val[i])
+							global.Global.Redis.SAdd(global.Global.Ctx, "key"+id, val[j])
 						}
 					}
 					//	删除
 
 				}
-
+				global.Global.Log.Info("goroutine is end")
 			}()
 		}
 	}
@@ -123,7 +123,7 @@ func Get(t string) []string {
 		if t == global.Global.Redis.Type(global.Global.Ctx, list[i]).Val() {
 			valList = append(valList, list[i])
 		}
-		global.Global.Log.Info(global.Global.Redis.Type(global.Global.Ctx, list[i]).Val())
 	}
+	//global.Global.Log.Info(global.Global.Redis.Type(global.Global.Ctx, list[i]).Val())
 	return valList
 }

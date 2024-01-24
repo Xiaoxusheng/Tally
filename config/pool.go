@@ -10,7 +10,7 @@ import (
 InitPool
 初始化协程池
 */
-var c = sync.Once{}
+var c = new(sync.Once)
 
 func InitPool() {
 	c.Do(
