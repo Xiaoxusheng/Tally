@@ -17,7 +17,7 @@ func InitKafka() {
 			global.Global.Log.Error("connect kafka  fail err:", err)
 			return
 		}
-		global.Global.Log.Info("kafka 连接成功！")
+		global.Global.Log.Info("kafka连接成功！")
 		global.Global.KafKa = conn
 	})
 }

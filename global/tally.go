@@ -2,6 +2,7 @@ package global
 
 import (
 	"context"
+	"github.com/casbin/casbin/v2"
 	"github.com/gammazero/workerpool"
 	"github.com/redis/go-redis/v9"
 	"github.com/segmentio/kafka-go"
@@ -10,13 +11,14 @@ import (
 )
 
 type Configs struct {
-	Mysql *gorm.DB               `json:"mysql"`
-	Redis *redis.Client          `json:"redis"`
-	Log   *log.Logger            `json:"log"`
-	Ctx   context.Context        `json:"ctx"`
-	Pool  *workerpool.WorkerPool `json:"pool"`
-	KafKa *kafka.Conn            `json:"kafKa"`
-	Mutex Mutex                  `json:"mutex"`
+	Mysql  *gorm.DB               `json:"mysql"`
+	Redis  *redis.Client          `json:"redis"`
+	Log    *log.Logger            `json:"log"`
+	Ctx    context.Context        `json:"ctx"`
+	Pool   *workerpool.WorkerPool `json:"pool"`
+	KafKa  *kafka.Conn            `json:"kafKa"`
+	Mutex  Mutex                  `json:"mutex"`
+	CasBin *casbin.Enforcer       `json:"casBin"`
 }
 
 var (
