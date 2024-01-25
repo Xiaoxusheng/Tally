@@ -7,7 +7,7 @@ import (
 	"sync"
 )
 
-var ks sync.Once
+var ks = new(sync.Once)
 
 func InitKafka() {
 	// 创建 Kafka 连接

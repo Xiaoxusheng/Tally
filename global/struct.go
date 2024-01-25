@@ -20,3 +20,8 @@ type Comment struct {
 	Text     string `json:"text" query:"text" form:"text" param:"text"`
 	ParentID string `json:"parent_id,omitempty" query:"parent_id" form:"parent_id" param:"parent_id"`
 }
+
+type DelComment struct {
+	BlogID    string `json:"blog_id," query:"blog_id" form:"blog_id"  param:"blog_id"`
+	CommentId string `json:"comment_id" query:"comment_id" form:"comment_id"  param:"comment_id"`
+}
