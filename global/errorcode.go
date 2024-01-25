@@ -15,6 +15,7 @@ const (
 	Collect                     //收藏博客
 	CommentCode                 //评论
 	LogCode                     //日志压缩
+	RootCode
 )
 
 // redis 使用前缀
@@ -33,6 +34,7 @@ const (
 	BlogHistory     = "blogHistory"
 	CommentList     = "commentList"
 	CommentId       = "commentId"
+	Role            = "role"
 )
 
 // 错误信息
@@ -69,6 +71,13 @@ const (
 	CommentFail             = "评论失败！"
 	CommentParentIdNotFound = "评论不存在！"
 	DelCommentFail          = "删除评论失败！"
+)
+
+const (
+	AddRoleFail       = "添加角色失败！"
+	AddPermissionFail = "分配资源失败！"
+	DelRoleFail       = "删除角色失败！"
+	DelPermissionFail = "删除资源失败！"
 )
 
 // 日=日志颜色

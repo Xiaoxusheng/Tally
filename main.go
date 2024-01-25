@@ -21,6 +21,8 @@ func main() {
 	config.InitLog()
 	//连接mysql
 	config.InitMysql()
+	//初始化casBin
+	config.InitCasBin()
 	//连接redis
 	config.InitRedis()
 	//初始化协程池
@@ -39,6 +41,7 @@ func main() {
 	e := echo.New()
 	e.Debug = true
 	e.Use(middleware.Logger(), middleware.Recover(), middleware.CORS(), middleware.RequestID(), middleware.Timeout())
+
 	router.Routers(e)
 	e.Logger.Fatal(e.Start(":" + strconv.Itoa(config.Config.Service.Port)))
 }
