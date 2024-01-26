@@ -3,7 +3,6 @@ package dao
 import (
 	"Tally/global"
 	"Tally/models"
-	"fmt"
 )
 
 func GetUserById(username, password string) *models.User {
@@ -75,7 +74,6 @@ func DeleteUser(id string) error {
 
 // UpdateAll 全量更新
 func UpdateAll(id string, user *global.User) error {
-	fmt.Println(user)
 	users := new(models.User)
 	var str, s string
 	if user.GithubId != "" {
@@ -90,4 +88,15 @@ func UpdateAll(id string, user *global.User) error {
 		Phone:    user.Phone,
 		GithubId: user.GithubId,
 	}).Error
+}
+
+// GetUserList 管理端
+func GetUserList() ([]*models.User, error) {
+	user := make([]*models.User, 0, 100)
+	return user, global.Global.Mysql.Find(&user).Error
+}
+
+func UpdateUserStatus(id string, status int) error {
+	user := new(models.User)
+	return global.Global.Mysql.Model(user).Where("identity=?", id).Update("status", status).Error
 }

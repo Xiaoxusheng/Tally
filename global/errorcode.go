@@ -16,10 +16,11 @@ const (
 	CommentCode                 //评论
 	LogCode                     //日志压缩
 	RootCode
+	AdminCode
 )
 
 // redis 使用前缀
-const (
+var (
 	SignIn          = "sign-in"
 	UserFollow      = "follow"
 	BanUser         = "ban_user"
@@ -38,7 +39,7 @@ const (
 )
 
 // 错误信息
-const (
+var (
 	UserNotFound            = "用户不存在！"
 	BannedUser              = "用户被封禁！"
 	ChangeUserInfo          = "修改用户信息失败！"
@@ -73,13 +74,21 @@ const (
 	DelCommentFail          = "删除评论失败！"
 )
 
-const (
+// 超级管理员
+var (
 	AddRoleFail          = "添加角色失败！"
 	AddPermissionFail    = "分配资源失败！"
 	DelRoleFail          = "删除角色失败！"
 	DelPermissionFail    = "删除资源失败！"
 	UpdatePermissionFail = "更新资源失败！"
 	PermissionNotFound   = "资源不存存在！"
+)
+
+// 管理员
+var (
+	GetUserListFail = "获取用户列表失败！"
+	BanUserFail     = "封禁用户失败！"
+	UserNotfound    = "用户不存在！"
 )
 
 // 日=日志颜色

@@ -130,6 +130,10 @@ func Routers(e *echo.Echo) {
 	//查看所有权限
 	root.POST("/get_allNamedSubjects", admin.GetAllNamedSubjects)
 	/*管理员*/
-	root.Group("/admin")
-
+	admins := e.Group("/admin")
+	admins.GET("/get_user_list", admin.GetUserInfoList)
+	//封禁用户
+	admins.GET("/ban_user", admin.BanUser)
+	//	解封用户
+	admins.GET("/unseal_user", admin.UnsealUser)
 }

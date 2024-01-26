@@ -106,8 +106,6 @@ func Set() {
 							global.Global.Redis.SAdd(global.Global.Ctx, "key"+id, val[j])
 						}
 					}
-					//	删除
-
 				}
 				global.Global.Log.Info("goroutine is end")
 			}()

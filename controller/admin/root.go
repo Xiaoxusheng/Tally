@@ -107,7 +107,6 @@ func GetAllNamedSubjects(c echo.Context) error {
 
 // UpdatePolicy 修改用户权限
 func UpdatePolicy(c echo.Context) error {
-	//todo 修改用户权限
 	//获取用户的权限
 	role := c.FormValue("role")
 	path := c.FormValue("path")

@@ -133,12 +133,22 @@ func Login(c echo.Context) error {
 	//获取token
 	res := global.Global.Redis.Get(global.Global.Ctx, val).Val()
 	if res != "" {
+		//判断是否被封禁
+		if global.Global.Redis.SIsMember(global.Global.Ctx, global.BanUser, val).Val() {
+			return common.Fail(c, global.UserCode, global.BannedUser)
+		}
 		// 打卡
 		global.Global.Redis.SetBit(global.Global.Ctx, global.SignIn+val, int64(time.Now().Day()-1), 1)
 		return common.Ok(c, map[string]any{"token": res})
 	} else {
+		//val是identity
 		token := utils.GetToken(val)
 		if val != "" {
+			//判断是否被封禁
+			if global.Global.Redis.SIsMember(global.Global.Ctx, global.BanUser, val).Val() {
+				return common.Fail(c, global.UserCode, global.BannedUser)
+			}
+			//identity不存在
 			global.Global.Log.Info("identity的值", val)
 			global.Global.Pool.Submit(func() {
 				global.Global.Redis.Set(global.Global.Ctx, val, token, config.Config.Jwt.Time*time.Hour)
@@ -150,11 +160,16 @@ func Login(c echo.Context) error {
 				}
 			})
 			return common.Ok(c, map[string]any{"token": token})
-		} else {
+		} else { //判断是否封禁
+
 			//数据库中获取
 			ok := dao.GetUserById(user.Username, utils.Md5(user.Password))
 			if ok == nil {
 				return common.Fail(c, global.UserCode, global.LoginErr)
+			}
+			//判断是否被封禁
+			if global.Global.Redis.SIsMember(global.Global.Ctx, global.BanUser, ok.Identity).Val() || ok.Status == global.Success {
+				return common.Fail(c, global.UserCode, global.BannedUser)
 			}
 			token = utils.GetToken(ok.Identity)
 			//异步更新
