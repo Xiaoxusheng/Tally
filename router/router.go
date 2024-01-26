@@ -98,7 +98,7 @@ func Routers(e *echo.Echo) {
 	//获取日志文件压缩包
 	users.GET("/export_log", user.ExportLog)
 
-	root := e.Group("/admin")
+	root := e.Group("/root")
 	root.Use(m.ParseToken())
 	root.Use(casbinmw.MiddlewareWithConfig(casbinmw.Config{
 		Skipper:        nil,
@@ -114,6 +114,7 @@ func Routers(e *echo.Echo) {
 		},
 		ErrorHandler: nil,
 	}))
+	/*超级管理员*/
 	//添加可以访问的资源
 	root.POST("/add_resource", admin.AddResource)
 	//分配角色
@@ -122,8 +123,13 @@ func Routers(e *echo.Echo) {
 	root.POST("/delete_roleForUser", admin.DeleteRoleForUser)
 	//删除资源
 	root.POST("/delete_permissionForUser", admin.DeletePermissionForUser)
+	//更新权限
+	root.POST("/update_policy", admin.UpdatePolicy)
 	//查看能访问的资源
 	root.POST("/get_permissionsForUser", admin.GetPermissionsForUser)
 	//查看所有权限
 	root.POST("/get_allNamedSubjects", admin.GetAllNamedSubjects)
+	/*管理员*/
+	root.Group("/admin")
+
 }

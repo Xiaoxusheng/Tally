@@ -74,10 +74,12 @@ const (
 )
 
 const (
-	AddRoleFail       = "添加角色失败！"
-	AddPermissionFail = "分配资源失败！"
-	DelRoleFail       = "删除角色失败！"
-	DelPermissionFail = "删除资源失败！"
+	AddRoleFail          = "添加角色失败！"
+	AddPermissionFail    = "分配资源失败！"
+	DelRoleFail          = "删除角色失败！"
+	DelPermissionFail    = "删除资源失败！"
+	UpdatePermissionFail = "更新资源失败！"
+	PermissionNotFound   = "资源不存存在！"
 )
 
 // 日=日志颜色

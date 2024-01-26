@@ -31,9 +31,9 @@ func ParseToken() echo.MiddlewareFunc {
 			token, err := jwt.ParseWithClaims(t[len(t)-1], claims, func(token *jwt.Token) (interface{}, error) {
 				return []byte(config.Config.Jwt.Key), nil
 			})
-			_, err = global.Global.Redis.Get(global.Global.Ctx, claims.Identity).Result()
-			if err != nil {
-				fmt.Println(err)
+			_, errs := global.Global.Redis.Get(global.Global.Ctx, claims.Identity).Result()
+			if errs != nil {
+				fmt.Println(errs)
 				return common.Fail(c, global.VerifyCode, "token过期或退出登录")
 			}
 
