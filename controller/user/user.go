@@ -344,6 +344,7 @@ func LoginInfo(c echo.Context) error {
 		return common.Fail(c, global.UserCode, global.QueryErr)
 	}
 	d := time.Now().Day()
+	global.Global.Log.Warn(d)
 	val := global.Global.Redis.BitField(global.Global.Ctx, global.SignIn+id, "GET", "u"+strconv.Itoa(d), 0).Val()
 	global.Global.Log.Info(val)
 	s := strings.Builder{}

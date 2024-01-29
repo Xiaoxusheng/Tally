@@ -201,7 +201,7 @@ func LikeList(c echo.Context) error {
 	list := make([]*models.Blog, 0, global.Global.Redis.SCard(global.Global.Ctx, global.BlogSetLikesKey+id).Val())
 	//获取点赞
 	val := global.Global.Redis.SMembers(global.Global.Ctx, global.BlogSetLikesKey+id).Val()
-	if len(val) == 0 {
+	if len(val) != 0 {
 		for _, res := range val {
 			blog := new(models.Blog)
 			text := global.Global.Redis.Get(global.Global.Ctx, global.BlogText+res).Val()
