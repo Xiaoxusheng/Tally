@@ -20,7 +20,7 @@ const (
 )
 
 // redis 使用前缀
-var (
+const (
 	SignIn          = "sign-in"
 	UserFollow      = "follow"
 	BanUser         = "ban_user"
@@ -39,7 +39,7 @@ var (
 )
 
 // 错误信息
-var (
+const (
 	UserNotFound            = "用户不存在！"
 	BannedUser              = "用户被封禁！"
 	ChangeUserInfo          = "修改用户信息失败！"
@@ -75,7 +75,7 @@ var (
 )
 
 // 超级管理员
-var (
+const (
 	AddRoleFail          = "添加角色失败！"
 	AddPermissionFail    = "分配资源失败！"
 	DelRoleFail          = "删除角色失败！"
