@@ -65,6 +65,7 @@ const (
 	QueryErr                = "获取必要参数失败！"
 	BlogCollect             = "收藏博客失败！"
 	BlogNotFound            = "博客不存在！"
+	BlogHistoryErr          = "获取浏览历史失败！"
 	DeleteBlogFail          = "删除博客失败！"
 	UpdateBlogStatusFail    = "修改博客状态失败！"
 	CreateLogErr            = "生成zip失败！"
@@ -101,14 +102,16 @@ const (
 
 // 常量
 const (
-	Success = 1
-	Fail    = 0
+	Success    = 1
+	Fail       = 0
+	FileNumber = 20
 )
 
 //s为单位,redis的过期时间
 
 const (
 	InfoTime = 7 * 24 * 60 * 60
+	BlogTime = 7 * 24 * 60 * 60
 )
 
 //kafka 相关

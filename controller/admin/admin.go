@@ -62,7 +62,10 @@ func UnsealUser(c echo.Context) error {
 	return common.Ok(c, nil)
 }
 
-//下架博客
+// Delint 下架博客
+func Delint() {
+
+}
 
 //人工审核博客
 

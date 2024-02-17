@@ -15,7 +15,7 @@ import (
 
 func Routers(e *echo.Echo) {
 	e.Validator = &utils.CustomValidator{Validator: validator.New()}
-	//middleware.Recover()
+
 	//登录
 	e.POST("/user/login", user.Login)
 	//注册
@@ -83,8 +83,10 @@ func Routers(e *echo.Echo) {
 	users.GET("/like_list", user.LikeList)
 	//博客列表
 	users.GET("/blog_list", user.BlogList)
-	//浏览历史
+	//浏览历史列表
 	users.GET("/get_blog_history_list", user.GetBlogHistoryList)
+	//添加浏览历史
+	users.GET("add_blog_history", user.AddBlogHistory)
 	//修改博客状态
 	users.GET("/update_blog_status", user.UpdateBlogStatus)
 	//收藏博客

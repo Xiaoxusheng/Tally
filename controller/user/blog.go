@@ -40,10 +40,11 @@ func Upload(c echo.Context) error {
 		global.Global.Log.Warn("上传失败" + err.Error())
 		return common.Fail(c, global.FileCode, global.FileErr)
 	}
-	if len(form.File["file"]) > 9 {
+	if len(form.File["file"]) > global.FileNumber {
+		global.Global.Log.Warn("文件数量超过限制！")
 		return common.Fail(c, global.FileCode, global.FileErr)
 	}
-	urlChan := make(chan global.UrlList, 9)
+	urlChan := make(chan global.UrlList, global.FileNumber)
 	for i, r := range form.File["file"] {
 		go utils.Upload(r, urlChan, i+1)
 	}
@@ -380,8 +381,41 @@ func CollectBlog(c echo.Context) error {
 	return common.Ok(c, nil)
 }
 
-// GetBlogHistoryList 浏览历史
+// GetBlogHistoryList 浏览历史列表
 func GetBlogHistoryList(c echo.Context) error {
+	id := utils.GetIdentity(c, "identity")
+	if id == "" {
+		return common.Fail(c, global.LikesCode, global.UserIdentityErr)
+	}
+	//查询
+	list, err := global.Global.Redis.SMembers(global.Global.Ctx, global.BlogHistory+id).Result()
+	if err != nil {
+		return common.Fail(c, global.BlogCode, global.BlogHistoryErr)
+	}
+	if len(list) == global.Fail {
+		//	查数据库
+		lists, err := dao.GetBlogListById(id)
+		if err != nil {
+			return common.Fail(c, global.BlogCode, global.BlogHistoryErr)
+		}
+		if len(lists) == 0 {
+			global.Global.Redis.SAdd(global.Global.Ctx, global.BlogHistory+id, "null")
+			return common.Fail(c, global.BlogCode, global.BlogHistoryErr)
+		}
+		global.Global.Pool.Submit(func() {
+			for i := 0; i < len(lists); i++ {
+				_, err := global.Global.Redis.SAdd(global.Global.Ctx, global.BlogHistory+id, lists[i].Identity).Result()
+				if err != nil {
+					global.Global.Log.Warn(err)
+				}
+			}
+		})
+	}
+	return common.Ok(c, nil)
+}
+
+// AddBlogHistory 添加浏览历史
+func AddBlogHistory(c echo.Context) error {
 	blogId := c.QueryParam("blogId")
 	if blogId == "" {
 		return common.Fail(c, global.BlogCode, global.QueryErr)
@@ -400,6 +434,8 @@ func GetBlogHistoryList(c echo.Context) error {
 	if err != nil {
 		return common.Fail(c, global.BlogCode, global.BlogCollect)
 	}
+	//添加时间
+	global.Global.Redis.Expire(global.Global.Ctx, global.BlogHistory+id, global.BlogTime)
 	return common.Ok(c, nil)
 }
 

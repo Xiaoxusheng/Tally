@@ -14,7 +14,7 @@ type Blog struct {
 	IsHide       bool   `gorm:"type:int ; comment:'文章是否私密'" json:"isHide"`
 	Likes        int32  `gorm:"type:int ; comment:'点赞数量'" json:"likes"`
 	IP           string `gorm:"type:varchar(64) not null ; comment:'IP地址'" json:"IP,omitempty"`
-	ViolateRule  bool   `gorm:"type:bool not null ; comment:'评论内容是否违规'"  json:"violateRule"`
+	ViolateRule  bool   `gorm:"type:bool not null ; comment:'文章内容是否违规'"  json:"violateRule"`
 }
 
 func (b *Blog) TableName() string {
