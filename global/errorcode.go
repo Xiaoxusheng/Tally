@@ -40,6 +40,7 @@ const (
 
 // 错误信息
 const (
+	RedisLockErr            = "解锁失败"
 	UserNotFound            = "用户不存在！"
 	BannedUser              = "用户被封禁！"
 	ChangeUserInfo          = "修改用户信息失败！"
